@@ -1,0 +1,774 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="تفقيط المبالغ مجاناً: اكتب أي مبلغ بالحروف العربية والإنجليزية للشيكات والفواتير، بالدرهم والريال والدينار. تفقيط جماعي لملفات Excel، حاسبة ضريبة القيمة المضافة، ومحول التاريخ الهجري.">
+<meta name="keywords" content="تفقيط, تفقيط المبالغ, تحويل الأرقام إلى حروف, كتابة المبلغ بالحروف, تفقيط درهم, تفقيط ريال, amount in words arabic, tafqeet, number to arabic words, cheque amount in words AED">
+<link rel="canonical" href="https://22316337.github.io/Projects/raqm/">
+<meta property="og:title" content="رقم · تفقيط المبالغ بالعربية والإنجليزية">
+<meta property="og:description" content="اكتب أي مبلغ بالحروف للشيكات والفواتير. مجاني ويعمل في المتصفح.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://22316337.github.io/Projects/raqm/">
+<meta name="theme-color" content="#0d6b4f">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="manifest" href="manifest.webmanifest">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"WebApplication","name":"Raqm رقم","applicationCategory":"FinanceApplication","operatingSystem":"Any","inLanguage":["ar","en"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"description":"Convert amounts to Arabic and English words (tafqeet) for cheques and invoices, batch convert for Excel, VAT calculator and Hijri date converter."}
+</script>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>تفقيط المبالغ بالحروف | رقم Raqm</title>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Reem+Kufi:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a banknote-desk — tool tabs across the top, each tool a single focused sheet; the amount tool's result is printed on a cheque line */
+:root{
+  --bg:#eef2ef; --panel:#ffffff; --ink:#14201b; --muted:#5b6b64; --line:#d6dfda; --soft:#f4f7f5;
+  --accent:#0d6b4f; --accent-ink:#ffffff; --accent-soft:#dcefe7;
+  --cheque:#f7fbf8; --guilloche:rgb(13 107 79 / .07); --stamp:#0d6b4f;
+  --bad:#b4232a;
+  --f-display:"Reem Kufi", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans Arabic", "Segoe UI", Tahoma, system-ui, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --r:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0d1311; --panel:#151d1a; --ink:#e4ece8; --muted:#94a69e; --line:#26322d; --soft:#1a2420;
+  --accent:#4fd1a1; --accent-ink:#06231a; --accent-soft:#163a2e;
+  --cheque:#17221e; --guilloche:rgb(79 209 161 / .07); --stamp:#4fd1a1; --bad:#ff8189;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0d1311; --panel:#151d1a; --ink:#e4ece8; --muted:#94a69e; --line:#26322d; --soft:#1a2420;
+  --accent:#4fd1a1; --accent-ink:#06231a; --accent-soft:#163a2e;
+  --cheque:#17221e; --guilloche:rgb(79 209 161 / .07); --stamp:#4fd1a1; --bad:#ff8189;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.6}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+.wrap{max-width:980px;margin:0 auto;padding-inline:16px;padding-block:18px 56px;display:flex;flex-direction:column;gap:18px}
+
+header.top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;margin-inline-end:auto}
+.mark{width:40px;height:40px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font-family:var(--f-display);font-size:22px;font-weight:700}
+.logo h1{margin:0;font-family:var(--f-display);font-size:24px;font-weight:700;line-height:1.1}
+.logo p{margin:0;color:var(--muted);font-size:13px}
+.langbtn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:6px 12px;cursor:pointer;font-weight:600}
+
+nav.tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:thin}
+nav.tabs button{flex:none;border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:8px 16px;cursor:pointer;font-weight:500;color:var(--muted);white-space:nowrap}
+nav.tabs button[aria-selected="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+
+.sheet{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:flex;flex-direction:column;gap:16px}
+.sheet h2{margin:0;font-family:var(--f-display);font-size:20px;font-weight:700}
+.sheet .lede{margin:-8px 0 0;color:var(--muted);max-width:65ch}
+.row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.row3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+label.f{display:flex;flex-direction:column;gap:5px;min-width:0}
+label.f>span{font-size:12.5px;color:var(--muted);font-weight:600}
+input[type=text],input[type=number],input[type=date],select,textarea{width:100%;min-width:0;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:10px 12px}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);background:var(--panel)}
+input.big{font-family:var(--f-mono);font-size:24px;padding:12px 14px;direction:ltr;text-align:start;font-variant-numeric:tabular-nums}
+[dir="rtl"] input.big{text-align:right}
+textarea{resize:vertical;min-height:160px;font-family:var(--f-mono);direction:ltr}
+.opts{display:flex;gap:16px;flex-wrap:wrap}
+.chk{display:flex;align-items:center;gap:7px;cursor:pointer;font-size:14px}
+.seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:6px 14px;border-radius:7px;cursor:pointer;color:var(--muted);font-weight:500}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .14)}
+
+/* cheque */
+.cheque{position:relative;background:var(--cheque);border:1px solid var(--line);border-radius:10px;padding:18px 20px 16px;overflow:hidden;isolation:isolate}
+.cheque::before{content:"";position:absolute;inset:0;z-index:-1;background:
+  repeating-radial-gradient(circle at 12% 120%, transparent 0 9px, var(--guilloche) 9px 10px),
+  repeating-radial-gradient(circle at 92% -30%, transparent 0 11px, var(--guilloche) 11px 12px)}
+.cq-head{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+.cq-box{font-family:var(--f-mono);font-size:15px;border:1.5px solid var(--ink);border-radius:6px;padding:2px 10px;direction:ltr;color:var(--ink);font-variant-numeric:tabular-nums}
+.cq-line{margin-top:14px;display:flex;flex-direction:column;gap:2px}
+.cq-lbl{font-size:11.5px;color:var(--muted);letter-spacing:.02em}
+.cq-text{font-size:19px;font-weight:600;line-height:1.75;border-bottom:1.5px dashed color-mix(in srgb,var(--ink) 45%,transparent);padding-bottom:4px;overflow-wrap:anywhere;min-height:2em}
+.cq-text.en{direction:ltr;text-align:left;font-size:16.5px;font-weight:500}
+.cq-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 14px;cursor:pointer;font-weight:600;display:inline-flex;gap:6px;align-items:center}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:5px 11px;font-size:13px}
+.err{color:var(--bad);font-size:13.5px;margin:0}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:9px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:9px 12px;border-bottom:1px solid var(--line);text-align:start;vertical-align:top}
+th{background:var(--soft);font-size:12.5px;color:var(--muted);font-weight:600;position:sticky;top:0}
+td.num{font-family:var(--f-mono);direction:ltr;white-space:nowrap;font-variant-numeric:tabular-nums}
+td.en{direction:ltr;text-align:left}
+tr:last-child td{border-bottom:0}
+
+.result{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.kv{background:var(--soft);border-radius:10px;padding:12px 14px;min-width:0}
+.kv small{display:block;color:var(--muted);font-size:12.5px}
+.kv b{font-family:var(--f-mono);font-size:20px;direction:ltr;display:block;text-align:start;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+[dir="rtl"] .kv b{text-align:right}
+.kv.hi{background:var(--accent-soft)}
+.kv.hi b{color:var(--accent)}
+
+.datebig{font-family:var(--f-display);font-size:26px;font-weight:700;line-height:1.3}
+.datesub{color:var(--muted)}
+.today{display:flex;gap:16px;align-items:center;flex-wrap:wrap;background:var(--accent-soft);border-radius:10px;padding:12px 16px}
+.today .datebig{font-size:20px}
+
+.digits-out{font-family:var(--f-mono);font-size:18px;background:var(--soft);border:1px solid var(--line);border-radius:9px;padding:12px 14px;min-height:52px;overflow-wrap:anywhere;direction:ltr}
+footer{color:var(--muted);font-size:12.5px;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(16px);background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:9px;opacity:0;transition:.2s;pointer-events:none;z-index:9;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+@media (max-width:640px){
+  .row,.row3,.result{grid-template-columns:1fr}
+  .sheet{padding:16px}
+  .cq-text{font-size:17px}
+  .logo p{display:none}
+}
+
+.seo h3{margin:.4em 0 0;font-size:16px}
+.seo p{margin:0;max-width:72ch}
+.seo article{display:flex;flex-direction:column;gap:10px}
+.faq{margin:0;display:grid;gap:10px}
+.faq dt{font-weight:600}
+.faq dd{margin:0;color:var(--muted)}
+.seo code{font-family:var(--f-mono);background:var(--soft);border:1px solid var(--line);border-radius:6px;padding:1px 6px;direction:ltr;display:inline-block}
+a.btn{text-decoration:none;color:inherit}
+a.btn.primary{color:var(--accent-ink)}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="logo"><div class="mark" aria-hidden="true">ر</div><div><h1 data-t="appName"></h1><p data-t="tagline"></p></div></div>
+    <button class="langbtn" id="langBtn" type="button"></button>
+  </header>
+
+  <nav class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-tab="words" data-t="tWords"></button>
+    <button role="tab" data-tab="batch" data-t="tBatch"></button>
+    <button role="tab" data-tab="vat" data-t="tVat"></button>
+    <button role="tab" data-tab="hijri" data-t="tHijri"></button>
+    <button role="tab" data-tab="digits" data-t="tDigits"></button>
+  </nav>
+
+  <!-- AMOUNT IN WORDS -->
+  <section class="sheet" data-panel="words">
+    <h2 data-t="wTitle"></h2>
+    <p class="lede" data-t="wLede"></p>
+    <div class="row">
+      <label class="f"><span data-t="amount"></span><input type="text" inputmode="decimal" class="big" id="wAmount" value="12500.75" autocomplete="off"></label>
+      <label class="f"><span data-t="currency"></span><select id="wCur" class="cursel"></select></label>
+    </div>
+    <div class="opts">
+      <label class="chk"><input type="checkbox" id="wWrap" checked> <span data-t="optWrap"></span></label>
+      <label class="chk"><input type="checkbox" id="wFrac"> <span data-t="optFrac"></span></label>
+    </div>
+    <p class="err" id="wErr" hidden></p>
+    <div class="cheque" aria-live="polite">
+      <div class="cq-head"><span data-t="cqPay"></span><span class="cq-box" id="cqBox"></span></div>
+      <div class="cq-line"><span class="cq-lbl" data-t="cqAr"></span><div class="cq-text" id="wAr" dir="rtl" lang="ar"></div></div>
+      <div class="cq-line"><span class="cq-lbl" data-t="cqEn"></span><div class="cq-text en" id="wEn" lang="en"></div></div>
+    </div>
+    <div class="cq-actions">
+      <button class="btn primary" type="button" data-copy="wAr" data-t="copyAr"></button>
+      <button class="btn" type="button" data-copy="wEn" data-t="copyEn"></button>
+      <button class="btn" type="button" id="copyBoth" data-t="copyBoth"></button>
+    </div>
+  </section>
+
+  <!-- BATCH -->
+  <section class="sheet" data-panel="batch" hidden>
+    <h2 data-t="bTitle"></h2>
+    <p class="lede" data-t="bLede"></p>
+    <div class="row">
+      <label class="f"><span data-t="bPaste"></span><textarea id="bIn" spellcheck="false">1250.50
+3,000
+15750
+٢٥٠٠
+99.99</textarea></label>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <label class="f"><span data-t="currency"></span><select id="bCur" class="cursel"></select></label>
+        <label class="f"><span data-t="bLang"></span>
+          <select id="bLang"><option value="ar" data-t="langAr"></option><option value="en" data-t="langEn"></option><option value="both" data-t="langBoth"></option></select></label>
+        <label class="chk"><input type="checkbox" id="bWrap" checked> <span data-t="optWrap"></span></label>
+      </div>
+    </div>
+    <div class="cq-actions">
+      <button class="btn primary" type="button" id="bCopy" data-t="bCopy"></button>
+      <button class="btn" type="button" id="bCsv" data-t="bCsv"></button>
+      <span id="bCount" style="color:var(--muted);align-self:center;font-size:13px"></span>
+    </div>
+    <div class="tablewrap"><table><thead><tr><th data-t="amount"></th><th id="bH1"></th><th id="bH2"></th></tr></thead><tbody id="bOut"></tbody></table></div>
+  </section>
+
+  <!-- VAT -->
+  <section class="sheet" data-panel="vat" hidden>
+    <h2 data-t="vTitle"></h2>
+    <p class="lede" data-t="vLede"></p>
+    <div class="seg" role="group" id="vMode"><button type="button" data-mode="add" data-t="vAdd"></button><button type="button" data-mode="remove" data-t="vRemove"></button></div>
+    <div class="row3">
+      <label class="f"><span id="vAmtLbl"></span><input type="text" inputmode="decimal" class="big" id="vAmount" value="1000" autocomplete="off"></label>
+      <label class="f"><span data-t="vCountry"></span><select id="vCountry"></select></label>
+      <label class="f"><span data-t="vRate"></span><input type="number" id="vRate" min="0" max="100" step="0.01" class="big" style="font-size:20px"></label>
+    </div>
+    <p class="err" id="vErr" hidden></p>
+    <div class="result">
+      <div class="kv"><small data-t="vNet"></small><b id="vNet"></b></div>
+      <div class="kv"><small id="vTaxLbl"></small><b id="vTax"></b></div>
+      <div class="kv hi"><small data-t="vGross"></small><b id="vGross"></b></div>
+    </div>
+    <div class="cheque"><div class="cq-line" style="margin:0"><span class="cq-lbl" data-t="vInWords"></span><div class="cq-text" id="vWords" dir="rtl" lang="ar"></div></div></div>
+    <div class="cq-actions"><button class="btn" type="button" id="vCopy" data-t="vCopy"></button></div>
+  </section>
+
+  <!-- HIJRI -->
+  <section class="sheet" data-panel="hijri" hidden>
+    <h2 data-t="hTitle"></h2>
+    <p class="lede" data-t="hLede"></p>
+    <div class="today"><div><small data-t="hToday" style="color:var(--muted)"></small><div class="datebig" id="hTodayH"></div></div><div class="datesub" id="hTodayG"></div></div>
+    <div class="seg" role="group" id="hMode"><button type="button" data-mode="g2h" data-t="hG2H"></button><button type="button" data-mode="h2g" data-t="hH2G"></button></div>
+    <div id="hG2H" class="row"><label class="f"><span data-t="hGDate"></span><input type="date" id="hGIn"></label><div></div></div>
+    <div id="hH2G" class="row3" hidden>
+      <label class="f"><span data-t="hDay"></span><select id="hD"></select></label>
+      <label class="f"><span data-t="hMonth"></span><select id="hM"></select></label>
+      <label class="f"><span data-t="hYear"></span><input type="number" id="hY" min="1300" max="1600" class="big" style="font-size:20px"></label>
+    </div>
+    <p class="err" id="hErr" hidden></p>
+    <div class="cheque"><div class="datebig" id="hOut"></div><div class="datesub" id="hOut2"></div><div class="datesub" id="hWeekday"></div></div>
+    <div class="cq-actions"><button class="btn" type="button" data-copy="hOut" data-t="copy"></button></div>
+    <small style="color:var(--muted)" data-t="hNote"></small>
+  </section>
+
+  <!-- DIGITS -->
+  <section class="sheet" data-panel="digits" hidden>
+    <h2 data-t="dTitle"></h2>
+    <p class="lede" data-t="dLede"></p>
+    <label class="f"><span data-t="dIn"></span><textarea id="dIn" style="min-height:90px">Invoice ٢٠٢٦/٠٤٥ — المبلغ ١٢٬٥٠٠٫٧٥</textarea></label>
+    <div class="seg" role="group" id="dMode"><button type="button" data-mode="w" data-t="dToW"></button><button type="button" data-mode="a" data-t="dToA"></button></div>
+    <div class="digits-out" id="dOut"></div>
+    <div class="cq-actions"><button class="btn" type="button" data-copy="dOut" data-t="copy"></button></div>
+  </section>
+
+
+  <section class="sheet seo" id="sheets-addon" data-addon hidden>
+    <div data-lang="ar">
+      <h2>التفقيط داخل Google Sheets</h2>
+      <p class="lede">اكتب <code>=TAFQEET(A2; "AED")</code> في أي خلية واحصل على المبلغ بالحروف فوراً، لآلاف الصفوف دفعة واحدة.</p>
+    </div>
+    <div data-lang="en">
+      <h2>Tafqeet inside Google Sheets</h2>
+      <p class="lede">Type <code>=TAFQEET(A2, "AED")</code> in any cell and get the amount in words instantly, for thousands of rows at once.</p>
+    </div>
+    <div class="cq-actions"><a class="btn primary" id="addonLink" href="#" target="_blank" rel="noopener"><span data-lang="ar">احصل على الإضافة</span><span data-lang="en">Get the add-on</span></a></div>
+  </section>
+
+  <section class="sheet seo">
+    <article data-lang="ar">
+      <h2>ما هو التفقيط؟</h2>
+      <p>التفقيط هو كتابة المبلغ المالي بالحروف بدلاً من الأرقام، مثل «فقط ألف وخمسمائة درهم إماراتي لا غير». يُستخدم في الشيكات والفواتير والعقود وسندات القبض والصرف، لأنه يمنع التلاعب بالأرقام ويوضح المبلغ دون لبس.</p>
+      <h3>لماذا «فقط» و«لا غير»؟</h3>
+      <p>تُضاف كلمة «فقط» قبل المبلغ و«لا غير» بعده حتى لا يمكن إضافة أي كلمة أو رقم إلى المبلغ المكتوب. يمكنك إيقافها من الخيارات إذا لم تحتجها.</p>
+      <h3>كيف يكتب التفقيط بشكل صحيح؟</h3>
+      <p>يراعي «رقم» قواعد العدد والمعدود في اللغة العربية: «ثلاثة دراهم» مع الجمع، و«أحد عشر درهماً» مع المفرد المنصوب، و«مائة درهم» مع المفرد المجرور، و«ألفا درهم» عند الإضافة. ويراعي كذلك تأنيث العملة مثل «ثلاث ليرات» و«إحدى وتسعون هللة».</p>
+      <h3>أسئلة شائعة</h3>
+      <dl class="faq">
+        <dt>هل الأداة مجانية؟</dt><dd>نعم، وتعمل بالكامل داخل متصفحك. لا يتم إرسال أي مبلغ إلى أي خادم.</dd>
+        <dt>ما العملات المدعومة؟</dt><dd>الدرهم الإماراتي، الريال السعودي والقطري والعماني، الدينار الكويتي والبحريني والأردني، الجنيه المصري، الدرهم المغربي، الدولار، اليورو، الجنيه الإسترليني، والليرة التركية.</dd>
+        <dt>كيف أفقّط عموداً كاملاً من Excel؟</dt><dd>افتح تبويب «تفقيط جماعي»، الصق الأرقام، ثم اضغط «نسخ للصق في Excel» والصق النتيجة في العمود المجاور.</dd>
+        <dt>كيف تُكتب الفلوس والهللات؟</dt><dd>تُكتب بالحروف بعد المبلغ الأساسي، مثل «وخمسون فلساً». الدينار الكويتي والبحريني والأردني والريال العماني تُقسم إلى ألف فلس أو بيسة، وتُحسب تلقائياً.</dd>
+      </dl>
+    </article>
+    <article data-lang="en">
+      <h2>What is tafqeet?</h2>
+      <p>Tafqeet means writing a money amount in words instead of digits, for example “Only One Thousand Five Hundred UAE Dirhams”. It is required on cheques and common on invoices, contracts and receipts across the Gulf, because written words are much harder to alter than digits.</p>
+      <h3>Correct Arabic grammar</h3>
+      <p>Raqm follows the Arabic rules for numbers and counted nouns: plural after 3 to 10, accusative singular after 11 to 99, genitive singular after hundreds and thousands, the construct dual (ألفا درهم), and feminine currencies such as the lira and the halala.</p>
+      <h3>FAQ</h3>
+      <dl class="faq">
+        <dt>Is it free?</dt><dd>Yes. Everything runs in your browser and no amount is ever sent to a server.</dd>
+        <dt>Which currencies are supported?</dt><dd>AED, SAR, QAR, OMR, KWD, BHD, JOD, EGP, MAD, USD, EUR, GBP and TRY, with the correct sub-unit for each (fils, halala, baisa, piastre, cents).</dd>
+        <dt>Can I convert a whole Excel column?</dt><dd>Yes. Open the Batch tab, paste your amounts, press “Copy for Excel” and paste the result into the next column.</dd>
+      </dl>
+    </article>
+  </section>
+
+  <footer data-t="footer"></footer>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ===== Raqm core: tafqeet (Arabic amount in words), English words, Hijri, VAT, digits ===== */
+const CUR = {
+  AED:{en:"UAE Dirham",enP:"UAE Dirhams",sub:"Fils",subP:"Fils",div:100,g:"m",s:"درهم إماراتي",d:"درهمان إماراتيان",p:"دراهم إماراتية",a:"درهماً إماراتياً",
+       ss:{g:"m",s:"فلس",d:"فلسان",p:"فلوس",a:"فلساً"}},
+  SAR:{en:"Saudi Riyal",enP:"Saudi Riyals",sub:"Halala",subP:"Halalas",div:100,g:"m",s:"ريال سعودي",d:"ريالان سعوديان",p:"ريالات سعودية",a:"ريالاً سعودياً",
+       ss:{g:"f",s:"هللة",d:"هللتان",p:"هللات",a:"هللة"}},
+  QAR:{en:"Qatari Riyal",enP:"Qatari Riyals",sub:"Dirham",subP:"Dirhams",div:100,g:"m",s:"ريال قطري",d:"ريالان قطريان",p:"ريالات قطرية",a:"ريالاً قطرياً",
+       ss:{g:"m",s:"درهم",d:"درهمان",p:"دراهم",a:"درهماً"}},
+  KWD:{en:"Kuwaiti Dinar",enP:"Kuwaiti Dinars",sub:"Fils",subP:"Fils",div:1000,g:"m",s:"دينار كويتي",d:"ديناران كويتيان",p:"دنانير كويتية",a:"ديناراً كويتياً",
+       ss:{g:"m",s:"فلس",d:"فلسان",p:"فلوس",a:"فلساً"}},
+  BHD:{en:"Bahraini Dinar",enP:"Bahraini Dinars",sub:"Fils",subP:"Fils",div:1000,g:"m",s:"دينار بحريني",d:"ديناران بحرينيان",p:"دنانير بحرينية",a:"ديناراً بحرينياً",
+       ss:{g:"m",s:"فلس",d:"فلسان",p:"فلوس",a:"فلساً"}},
+  OMR:{en:"Omani Rial",enP:"Omani Rials",sub:"Baisa",subP:"Baisa",div:1000,g:"m",s:"ريال عماني",d:"ريالان عمانيان",p:"ريالات عمانية",a:"ريالاً عمانياً",
+       ss:{g:"f",s:"بيسة",d:"بيستان",p:"بيسات",a:"بيسة"}},
+  JOD:{en:"Jordanian Dinar",enP:"Jordanian Dinars",sub:"Fils",subP:"Fils",div:1000,g:"m",s:"دينار أردني",d:"ديناران أردنيان",p:"دنانير أردنية",a:"ديناراً أردنياً",
+       ss:{g:"m",s:"فلس",d:"فلسان",p:"فلوس",a:"فلساً"}},
+  EGP:{en:"Egyptian Pound",enP:"Egyptian Pounds",sub:"Piastre",subP:"Piastres",div:100,g:"m",s:"جنيه مصري",d:"جنيهان مصريان",p:"جنيهات مصرية",a:"جنيهاً مصرياً",
+       ss:{g:"m",s:"قرش",d:"قرشان",p:"قروش",a:"قرشاً"}},
+  MAD:{en:"Moroccan Dirham",enP:"Moroccan Dirhams",sub:"Centime",subP:"Centimes",div:100,g:"m",s:"درهم مغربي",d:"درهمان مغربيان",p:"دراهم مغربية",a:"درهماً مغربياً",
+       ss:{g:"m",s:"سنتيم",d:"سنتيمان",p:"سنتيمات",a:"سنتيماً"}},
+  USD:{en:"US Dollar",enP:"US Dollars",sub:"Cent",subP:"Cents",div:100,g:"m",s:"دولار أمريكي",d:"دولاران أمريكيان",p:"دولارات أمريكية",a:"دولاراً أمريكياً",
+       ss:{g:"m",s:"سنت",d:"سنتان",p:"سنتات",a:"سنتاً"}},
+  EUR:{en:"Euro",enP:"Euros",sub:"Cent",subP:"Cents",div:100,g:"m",s:"يورو",d:"يوروان",p:"يورو",a:"يورو",
+       ss:{g:"m",s:"سنت",d:"سنتان",p:"سنتات",a:"سنتاً"}},
+  GBP:{en:"Pound Sterling",enP:"Pounds Sterling",sub:"Penny",subP:"Pence",div:100,g:"m",s:"جنيه إسترليني",d:"جنيهان إسترلينيان",p:"جنيهات إسترلينية",a:"جنيهاً إسترلينياً",
+       ss:{g:"m",s:"بنس",d:"بنسان",p:"بنسات",a:"بنساً"}},
+  TRY:{en:"Turkish Lira",enP:"Turkish Liras",sub:"Kuruş",subP:"Kuruş",div:100,g:"f",s:"ليرة تركية",d:"ليرتان تركيتان",p:"ليرات تركية",a:"ليرة تركية",
+       ss:{g:"m",s:"قرش",d:"قرشان",p:"قروش",a:"قرشاً"}},
+  NONE:{en:"",enP:"",sub:"",subP:"",div:100,g:"m",s:"",d:"",p:"",a:"",ss:null}
+};
+
+const ONES_M = ["","واحد","اثنان","ثلاثة","أربعة","خمسة","ستة","سبعة","ثمانية","تسعة","عشرة"];
+const ONES_F = ["","واحدة","اثنتان","ثلاث","أربع","خمس","ست","سبع","ثماني","تسع","عشر"];
+const TEENS_M = ["","أحد عشر","اثنا عشر","ثلاثة عشر","أربعة عشر","خمسة عشر","ستة عشر","سبعة عشر","ثمانية عشر","تسعة عشر"];
+const TEENS_F = ["","إحدى عشرة","اثنتا عشرة","ثلاث عشرة","أربع عشرة","خمس عشرة","ست عشرة","سبع عشرة","ثماني عشرة","تسع عشرة"];
+const TENS = ["","","عشرون","ثلاثون","أربعون","خمسون","ستون","سبعون","ثمانون","تسعون"];
+const HUNDREDS = ["","مائة","مائتان","ثلاثمائة","أربعمائة","خمسمائة","ستمائة","سبعمائة","ثمانمائة","تسعمائة"];
+const SCALES = [null,
+  {s:"ألف",d:"ألفان",dm:"ألفا",p:"آلاف",a:"ألفاً"},
+  {s:"مليون",d:"مليونان",dm:"مليونا",p:"ملايين",a:"مليوناً"},
+  {s:"مليار",d:"ملياران",dm:"مليارا",p:"مليارات",a:"ملياراً"},
+  {s:"تريليون",d:"تريليونان",dm:"تريليونا",p:"تريليونات",a:"تريليوناً"}];
+
+/* words for 1..999, gender of the counted noun */
+function arBelow1000(n, g){
+  const O = g === "f" ? ONES_F : ONES_M, T = g === "f" ? TEENS_F : TEENS_M;
+  const h = Math.floor(n / 100), r = n % 100, parts = [];
+  if(h) parts.push(HUNDREDS[h]);
+  if(r){
+    if(r <= 10) parts.push(O[r]);
+    else if(r < 20) parts.push(T[r - 10]);
+    else { const u = r % 10, t = Math.floor(r / 10); const uw = u === 1 ? (g === "f" ? "إحدى" : "واحد") : O[u]; parts.push(u ? uw + " و" + TENS[t] : TENS[t]); }
+  }
+  return parts.join(" و");
+}
+/* a scale word (ألف, مليون...) counted n times; mudaf = a noun follows it directly */
+function arScale(n, N, mudaf){
+  if(n === 1) return N.s;
+  if(n === 2) return mudaf ? N.dm : N.d;
+  const r = n % 100;
+  const form = r >= 3 && r <= 10 ? N.p : (r >= 11 && !mudaf) ? N.a : N.s;
+  return arBelow1000(n, "m") + " " + form;
+}
+/* integer (BigInt-safe up to 999 trillion) to Arabic words, gender for the final noun */
+function arInt(n, g, followed){
+  if(n === 0) return "صفر";
+  const groups = []; let x = n;
+  while(x > 0){ groups.push(x % 1000); x = Math.floor(x / 1000); }
+  const parts = [];
+  for(let i = groups.length - 1; i >= 0; i--){
+    const v = groups[i]; if(!v) continue;
+    if(i === 0) parts.push(arBelow1000(v, g));
+    else parts.push(arScale(v, SCALES[i], followed && groups.slice(0, i).every(x => !x)));
+  }
+  return parts.join(" و");
+}
+/* integer + currency noun, grammatically counted */
+function arAmount(n, C){
+  if(!C || !C.s) return arInt(n, "m");
+  if(n === 0) return "صفر " + C.s;
+  if(n === 1) return C.s + " " + (C.g === "f" ? "واحدة" : "واحد");
+  if(n === 2) return C.d;
+  const r = n % 100;
+  const form = r >= 3 && r <= 10 ? C.p : r >= 11 ? C.a : C.s;
+  // when the number is an exact scale (e.g. 1000, 2000000) Arabic reads "ألف درهم"
+  return arInt(n, C.g, true) + " " + form;
+}
+function splitAmount(value, div){
+  const neg = value < 0; value = Math.abs(value);
+  const decimals = div === 1000 ? 3 : 2;
+  const fixed = value.toFixed(decimals);
+  const [i, f] = fixed.split(".");
+  return { neg, int: parseInt(i, 10), frac: parseInt(f || "0", 10) };
+}
+function tafqeet(value, code = "AED", opts = {}){
+  const C = CUR[code] || CUR.NONE;
+  const { neg, int, frac } = splitAmount(value, C.div);
+  if(int > 999999999999999) return "";
+  const subAsFraction = opts.subStyle === "fraction";
+  let out = int === 0 && frac && C.ss && !subAsFraction ? "" : arAmount(int, C);
+  if(frac){
+    const fp = C.ss && !subAsFraction ? arAmount(frac, C.ss) : frac + "/" + C.div;
+    out = out ? out + " و" + fp : fp;
+  }
+  if(neg) out = "سالب " + out;
+  if(opts.wrap !== false) out = "فقط " + out + " لا غير";
+  return out;
+}
+
+/* ===== English ===== */
+const EN1 = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+const EN10 = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+const ENS = ["","Thousand","Million","Billion","Trillion"];
+function enBelow1000(n){
+  const h = Math.floor(n / 100), r = n % 100, p = [];
+  if(h) p.push(EN1[h] + " Hundred");
+  if(r) p.push(r < 20 ? EN1[r] : EN10[Math.floor(r / 10)] + (r % 10 ? "-" + EN1[r % 10] : ""));
+  return p.join(" ");
+}
+function enInt(n){
+  if(n === 0) return "Zero";
+  const g = []; let x = n; while(x > 0){ g.push(x % 1000); x = Math.floor(x / 1000); }
+  const p = [];
+  for(let i = g.length - 1; i >= 0; i--) if(g[i]) p.push(enBelow1000(g[i]) + (ENS[i] ? " " + ENS[i] : ""));
+  return p.join(" ");
+}
+function enWords(value, code = "AED", opts = {}){
+  const C = CUR[code] || CUR.NONE;
+  const { neg, int, frac } = splitAmount(value, C.div);
+  if(int > 999999999999999) return "";
+  const subW = C.sub && opts.subStyle !== "fraction";
+  let out = int === 0 && frac && subW ? "" : enInt(int) + (C.en ? " " + (int === 1 ? C.en : C.enP) : "");
+  if(frac){
+    const fp = subW ? enInt(frac) + " " + (frac === 1 ? C.sub : C.subP) : frac + "/" + C.div;
+    out = out ? out + " and " + fp : fp;
+  }
+  if(neg) out = "Minus " + out;
+  if(opts.wrap !== false) out = "Only " + out;
+  return out;
+}
+
+/* ===== Digits ===== */
+const AR_DIG = "٠١٢٣٤٥٦٧٨٩", FA_DIG = "۰۱۲۳۴۵۶۷۸۹";
+function toWestern(s){ return String(s).replace(/[٠-٩]/g, d => AR_DIG.indexOf(d)).replace(/[۰-۹]/g, d => FA_DIG.indexOf(d)).replace(/٫/g, ".").replace(/٬/g, ","); }
+function toArabicDigits(s){ return String(s).replace(/\d/g, d => AR_DIG[d]); }
+/* parse a messy amount: "1,250.50", "١٬٢٥٠٫٥٠", "AED 1 250", "1.250,50" (EU) */
+function parseAmount(raw){
+  let s = toWestern(raw).trim();
+  if(!s) return NaN;
+  const neg = /^-|^\(|-$/.test(s.replace(/[^\d\-().]/g, "")) && /-|\(/.test(s);
+  s = s.replace(/[^\d.,]/g, "");
+  if(!s) return NaN;
+  const lastDot = s.lastIndexOf("."), lastComma = s.lastIndexOf(",");
+  if(lastDot >= 0 && lastComma >= 0){
+    if(lastComma > lastDot) s = s.replace(/\./g, "").replace(",", ".");
+    else s = s.replace(/,/g, "");
+  } else if(lastComma >= 0){
+    const after = s.length - lastComma - 1;
+    s = (after === 3 || (s.match(/,/g) || []).length > 1) ? s.replace(/,/g, "") : s.replace(",", ".");
+  } else if((s.match(/\./g) || []).length > 1){ s = s.replace(/\./g, ""); }
+  const v = parseFloat(s);
+  return isNaN(v) ? NaN : (neg ? -v : v);
+}
+
+/* ===== Hijri (Umm al-Qura via Intl) ===== */
+const HIJRI_MONTHS_AR = ["محرم","صفر","ربيع الأول","ربيع الآخر","جمادى الأولى","جمادى الآخرة","رجب","شعبان","رمضان","شوال","ذو القعدة","ذو الحجة"];
+const HIJRI_MONTHS_EN = ["Muharram","Safar","Rabi al-Awwal","Rabi al-Thani","Jumada al-Ula","Jumada al-Akhirah","Rajab","Shaban","Ramadan","Shawwal","Dhu al-Qadah","Dhu al-Hijjah"];
+let _hfmt;
+function toHijri(date){
+  _hfmt = _hfmt || new Intl.DateTimeFormat("en-u-ca-islamic-umalqura-nu-latn", { day: "numeric", month: "numeric", year: "numeric", timeZone: "UTC" });
+  const parts = _hfmt.formatToParts(date); const get = t => parseInt(parts.find(p => p.type === t).value, 10);
+  return { y: get("year"), m: get("month"), d: get("day") };
+}
+function fromHijri(y, m, d){
+  // estimate then walk; Umm al-Qura months are 29 or 30 days
+  const approx = Date.UTC(622, 6, 19) + Math.round((y - 1) * 354.36707 + (m - 1) * 29.530589 + (d - 1)) * 86400000;
+  let t = new Date(Math.round(approx / 86400000) * 86400000);
+  for(let i = 0; i < 80; i++){
+    const h = toHijri(t);
+    const diff = ((y - h.y) * 354 + (m - h.m) * 29.5 + (d - h.d));
+    if(h.y === y && h.m === m && h.d === d) return t;
+    const step = Math.abs(diff) > 2 ? Math.round(diff) : Math.sign(diff);
+    t = new Date(t.getTime() + step * 86400000);
+  }
+  return null;
+}
+function hijriMonthLength(y, m){
+  const start = fromHijri(y, m, 1); if(!start) return 30;
+  const t = new Date(start.getTime() + 29 * 86400000);
+  return toHijri(t).m === m ? 30 : 29;
+}
+
+/* ===== VAT ===== */
+function vat(amount, rate, mode){
+  const r = rate / 100;
+  if(mode === "remove"){ const net = amount / (1 + r); return { net: round(net), tax: round(amount - net), gross: round(amount) }; }
+  const tax = amount * r; return { net: round(amount), tax: round(tax), gross: round(amount + tax) };
+}
+function round(n, d = 2){ const f = Math.pow(10, d); return Math.round((n + Number.EPSILON) * f) / f; }
+
+// exports for node tests
+if(typeof module !== "undefined") module.exports = { tafqeet, enWords, parseAmount, toWestern, toArabicDigits, toHijri, fromHijri, hijriMonthLength, vat, CUR, arInt };
+
+(() => {
+const $ = id => document.getElementById(id);
+const store = { get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } }, set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} } };
+
+const T = {
+ ar:{ appName:"رقم", tagline:"تفقيط المبالغ، الضريبة، والتاريخ الهجري", tWords:"التفقيط", tBatch:"تفقيط جماعي", tVat:"ضريبة القيمة المضافة", tHijri:"التاريخ الهجري", tDigits:"تحويل الأرقام",
+  wTitle:"كتابة المبلغ بالحروف", wLede:"اكتب أي مبلغ لتحصل على صيغته الصحيحة بالحروف للشيكات والفواتير والعقود، بالعربية والإنجليزية.",
+  amount:"المبلغ", currency:"العملة", optWrap:"إضافة «فقط … لا غير»", optFrac:"كتابة الكسور كأرقام (مثل 75/100)",
+  cqPay:"ادفعوا بموجب هذا الشيك", cqAr:"المبلغ بالحروف (عربي)", cqEn:"Amount in words (English)",
+  copyAr:"نسخ العربي", copyEn:"نسخ الإنجليزي", copyBoth:"نسخ الاثنين", copy:"نسخ", copied:"تم النسخ",
+  errAmount:"اكتب رقماً صحيحاً، مثل 1250.50", errBig:"المبلغ أكبر من الحد المسموح (أقل من ألف تريليون).",
+  bTitle:"تفقيط جماعي", bLede:"الصق عموداً من الأرقام من Excel أو أي جدول، مبلغ في كل سطر، ثم انسخ النتيجة والصقها في Excel مباشرة.",
+  bPaste:"الصق المبالغ هنا (مبلغ في كل سطر)", bLang:"اللغة", langAr:"عربي", langEn:"إنجليزي", langBoth:"عربي + إنجليزي",
+  bCopy:"نسخ للصق في Excel", bCsv:"تنزيل CSV", bRows:n => n + " مبلغ", bSkip:"غير مفهوم", noDl:"التنزيل غير متاح هنا. استخدم زر النسخ.", saved:"تم الحفظ",
+  vTitle:"حاسبة ضريبة القيمة المضافة", vLede:"أضف الضريبة إلى مبلغ أو استخرجها من مبلغ شامل الضريبة، بنسب دول الخليج والمنطقة.",
+  vAdd:"إضافة الضريبة", vRemove:"استخراج الضريبة", vAmtNet:"المبلغ قبل الضريبة", vAmtGross:"المبلغ شامل الضريبة", vCountry:"الدولة", vRate:"النسبة %",
+  vNet:"قبل الضريبة", vTax:r => "الضريبة (" + r + "%)", vGross:"الإجمالي شامل الضريبة", vInWords:"الإجمالي بالحروف", vCopy:"نسخ ملخص الفاتورة", custom:"نسبة مخصصة",
+  hTitle:"محوّل التاريخ الهجري", hLede:"حوّل بين التاريخ الميلادي والهجري وفق تقويم أم القرى المعتمد في السعودية.", hToday:"اليوم",
+  hG2H:"ميلادي ← هجري", hH2G:"هجري ← ميلادي", hGDate:"التاريخ الميلادي", hDay:"اليوم", hMonth:"الشهر", hYear:"السنة الهجرية",
+  hNote:"يعتمد على تقويم أم القرى. قد تختلف بداية الأشهر القمرية يوماً واحداً حسب رؤية الهلال في بلدك.", hErr:"هذا التاريخ الهجري غير موجود.",
+  hSuffixH:"هـ", hSuffixG:"م",
+  dTitle:"تحويل الأرقام", dLede:"حوّل الأرقام العربية المشرقية (٠١٢٣) إلى أرقام لاتينية (0123) أو العكس، داخل أي نص.", dIn:"النص", dToW:"إلى 0123", dToA:"إلى ٠١٢٣",
+  footer:"رقم · مجاني ويعمل بالكامل في متصفحك. راجع المبالغ المهمة قبل اعتمادها." },
+ en:{ appName:"Raqm", tagline:"Amounts in words, VAT and Hijri dates", tWords:"Amount in words", tBatch:"Batch", tVat:"VAT", tHijri:"Hijri date", tDigits:"Digits",
+  wTitle:"Write an amount in words", wLede:"Type any amount to get the correct written form for cheques, invoices and contracts, in Arabic and English.",
+  amount:"Amount", currency:"Currency", optWrap:"Add “Only … ” wording", optFrac:"Write fractions as numbers (e.g. 75/100)",
+  cqPay:"Pay against this cheque", cqAr:"المبلغ بالحروف (عربي)", cqEn:"Amount in words (English)",
+  copyAr:"Copy Arabic", copyEn:"Copy English", copyBoth:"Copy both", copy:"Copy", copied:"Copied",
+  errAmount:"Enter a valid number, like 1250.50", errBig:"That amount is too large (must be under one quadrillion).",
+  bTitle:"Batch conversion", bLede:"Paste a column of amounts from Excel or any table, one per line, then copy the result straight back into Excel.",
+  bPaste:"Paste amounts here (one per line)", bLang:"Language", langAr:"Arabic", langEn:"English", langBoth:"Arabic + English",
+  bCopy:"Copy for Excel", bCsv:"Download CSV", bRows:n => n + " amounts", bSkip:"Not a number", noDl:"Downloads aren't available here. Use Copy instead.", saved:"Saved",
+  vTitle:"VAT calculator", vLede:"Add VAT to an amount, or extract it from a VAT-inclusive amount, using Gulf and regional rates.",
+  vAdd:"Add VAT", vRemove:"Extract VAT", vAmtNet:"Amount before VAT", vAmtGross:"Amount including VAT", vCountry:"Country", vRate:"Rate %",
+  vNet:"Before VAT", vTax:r => "VAT (" + r + "%)", vGross:"Total incl. VAT", vInWords:"Total in words", vCopy:"Copy invoice summary", custom:"Custom rate",
+  hTitle:"Hijri date converter", hLede:"Convert between Gregorian and Hijri dates using the Umm al-Qura calendar used in Saudi Arabia.", hToday:"Today",
+  hG2H:"Gregorian → Hijri", hH2G:"Hijri → Gregorian", hGDate:"Gregorian date", hDay:"Day", hMonth:"Month", hYear:"Hijri year",
+  hNote:"Based on the Umm al-Qura calendar. Month starts can differ by a day depending on local moon sighting.", hErr:"That Hijri date doesn't exist.",
+  hSuffixH:"AH", hSuffixG:"",
+  dTitle:"Digit converter", dLede:"Convert Eastern Arabic digits (٠١٢٣) to Western digits (0123) or back, inside any text.", dIn:"Text", dToW:"To 0123", dToA:"To ٠١٢٣",
+  footer:"Raqm · Free and runs entirely in your browser. Double-check important amounts before you sign." }
+};
+const COUNTRIES = [
+  {k:"AE",ar:"الإمارات",en:"UAE",r:5,c:"AED",tax:"VAT"},{k:"SA",ar:"السعودية",en:"Saudi Arabia",r:15,c:"SAR"},{k:"BH",ar:"البحرين",en:"Bahrain",r:10,c:"BHD"},
+  {k:"OM",ar:"عُمان",en:"Oman",r:5,c:"OMR"},{k:"EG",ar:"مصر",en:"Egypt",r:14,c:"EGP"},{k:"MA",ar:"المغرب",en:"Morocco",r:20,c:"MAD"},
+  {k:"JO",ar:"الأردن (ضريبة المبيعات)",en:"Jordan (sales tax)",r:16,c:"JOD"},{k:"TR",ar:"تركيا",en:"Turkey",r:20,c:"TRY"},{k:"X",ar:"",en:"",r:null,c:null}];
+
+let lang = store.get("raqm.lang", "ar");
+let tab = store.get("raqm.tab", "words");
+const t = (k, ...a) => { const v = T[lang][k]; return typeof v === "function" ? v(...a) : v; };
+
+/* ---------- i18n ---------- */
+function applyLang(){
+  document.documentElement.lang = lang; document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+  document.querySelectorAll("[data-t]").forEach(el => { el.textContent = t(el.dataset.t); });
+  document.querySelectorAll("[data-lang]").forEach(el => { el.hidden = el.dataset.lang !== lang; });
+  $("langBtn").textContent = lang === "ar" ? "English" : "العربية";
+  document.title = lang === "ar" ? "تفقيط المبالغ بالحروف | رقم Raqm" : "Amount in Words, Arabic & English | Raqm";
+  fillCurrencies(); fillCountries(); fillHijriSelects();
+  renderAll();
+}
+$("langBtn").addEventListener("click", () => { lang = lang === "ar" ? "en" : "ar"; store.set("raqm.lang", lang); applyLang(); });
+
+function fillCurrencies(){
+  document.querySelectorAll(".cursel").forEach(sel => {
+    const v = sel.value || store.get("raqm.cur", "AED");
+    sel.innerHTML = Object.keys(CUR).filter(k => k !== "NONE").map(k => `<option value="${k}">${k} · ${lang === "ar" ? CUR[k].s : CUR[k].en}</option>`).join("")
+      + `<option value="NONE">${lang === "ar" ? "بدون عملة (رقم فقط)" : "No currency (number only)"}</option>`;
+    sel.value = v;
+  });
+}
+
+/* ---------- tabs ---------- */
+function showTab(k){
+  tab = k; store.set("raqm.tab", k);
+  document.querySelectorAll("#tabs button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === k));
+  document.querySelectorAll("[data-panel]").forEach(p => p.hidden = p.dataset.panel !== k);
+}
+document.querySelectorAll("#tabs button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
+const hashTab = (location.hash || "").slice(1);
+if(["words","batch","vat","hijri","digits"].includes(hashTab)) tab = hashTab;
+
+/* ---------- copy ---------- */
+let toastT;
+function toast(m){ const el = $("toast"); el.textContent = m; el.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove("show"), 1800); }
+async function copyText(text, el){
+  try{ await navigator.clipboard.writeText(text); toast(t("copied")); }
+  catch(e){
+    if(el){ const r = document.createRange(); r.selectNodeContents(el); const s = getSelection(); s.removeAllRanges(); s.addRange(r); }
+    toast(lang === "ar" ? "النص محدد — اضغط Ctrl+C للنسخ" : "Text selected — press Ctrl+C to copy");
+  }
+}
+document.querySelectorAll("[data-copy]").forEach(b => b.addEventListener("click", () => { const el = $(b.dataset.copy); copyText(el.textContent, el); }));
+
+const fmtNum = (v, cur) => { const d = cur && CUR[cur] && CUR[cur].div === 1000 ? 3 : 2; return new Intl.NumberFormat("en-US", { minimumFractionDigits: d, maximumFractionDigits: d }).format(v); };
+const MAX = 999999999999999;
+
+/* ---------- words ---------- */
+function renderWords(){
+  const v = parseAmount($("wAmount").value), cur = $("wCur").value;
+  const opts = { wrap: $("wWrap").checked, subStyle: $("wFrac").checked ? "fraction" : "words" };
+  const err = $("wErr");
+  if(isNaN(v)){ err.hidden = !$("wAmount").value.trim(); err.textContent = t("errAmount"); $("wAr").textContent = ""; $("wEn").textContent = ""; $("cqBox").textContent = "—"; return; }
+  if(Math.abs(v) > MAX){ err.hidden = false; err.textContent = t("errBig"); return; }
+  err.hidden = true;
+  $("wAr").textContent = tafqeet(v, cur, opts);
+  $("wEn").textContent = enWords(v, cur, opts);
+  $("cqBox").textContent = (cur !== "NONE" ? cur + " " : "") + fmtNum(v, cur);
+  store.set("raqm.cur", cur);
+}
+["wAmount","wCur","wWrap","wFrac"].forEach(id => $(id).addEventListener("input", renderWords));
+$("wCur").addEventListener("change", renderWords);
+$("copyBoth").addEventListener("click", () => copyText($("wAr").textContent + "\n" + $("wEn").textContent));
+
+/* ---------- batch ---------- */
+let batchRows = [];
+function renderBatch(){
+  const cur = $("bCur").value, mode = $("bLang").value, wrap = $("bWrap").checked;
+  const lines = $("bIn").value.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  batchRows = lines.map(raw => {
+    const first = raw.split(/\t/)[0];
+    const v = parseAmount(first);
+    if(isNaN(v) || Math.abs(v) > MAX) return { raw, ok: false };
+    return { raw, v, ok: true, ar: tafqeet(v, cur, { wrap }), en: enWords(v, cur, { wrap }) };
+  });
+  $("bH1").textContent = mode === "en" ? t("langEn") : t("langAr");
+  $("bH2").textContent = mode === "both" ? t("langEn") : ""; $("bH2").hidden = mode !== "both";
+  $("bOut").innerHTML = "";
+  batchRows.forEach(r => {
+    const tr = document.createElement("tr");
+    const a = document.createElement("td"); a.className = "num"; a.textContent = r.ok ? fmtNum(r.v, cur) : r.raw; tr.appendChild(a);
+    const b = document.createElement("td");
+    if(!r.ok){ b.textContent = t("bSkip"); b.style.color = "var(--bad)"; }
+    else if(mode === "en"){ b.textContent = r.en; b.className = "en"; }
+    else { b.textContent = r.ar; b.dir = "rtl"; }
+    tr.appendChild(b);
+    if(mode === "both"){ const c = document.createElement("td"); c.className = "en"; c.textContent = r.ok ? r.en : ""; tr.appendChild(c); }
+    $("bOut").appendChild(tr);
+  });
+  $("bCount").textContent = batchRows.length ? t("bRows", batchRows.length) : "";
+}
+["bIn","bCur","bLang","bWrap"].forEach(id => $(id).addEventListener("input", renderBatch));
+["bCur","bLang"].forEach(id => $(id).addEventListener("change", renderBatch));
+function batchCells(r, mode){ if(!r.ok) return [r.raw, ""]; return mode === "both" ? [r.v, r.ar, r.en] : [r.v, mode === "en" ? r.en : r.ar]; }
+$("bCopy").addEventListener("click", () => {
+  const mode = $("bLang").value;
+  // only the words column(s), so they paste next to the existing amounts column
+  copyText(batchRows.map(r => batchCells(r, mode).slice(1).join("\t")).join("\n"));
+});
+$("bCsv").addEventListener("click", () => {
+  const mode = $("bLang").value, q = s => '"' + String(s).replace(/"/g, '""') + '"';
+  const head = mode === "both" ? ["Amount","Arabic","English"] : ["Amount", mode === "en" ? "English" : "Arabic"];
+  const csv = "\ufeff" + [head, ...batchRows.map(r => batchCells(r, mode))].map(r => r.map(q).join(",")).join("\r\n");
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+  a.download = "raqm-amounts-in-words.csv"; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+});
+
+/* ---------- VAT ---------- */
+let vMode = "add";
+function fillCountries(){
+  const sel = $("vCountry"), v = sel.value || "AE";
+  sel.innerHTML = COUNTRIES.map(c => `<option value="${c.k}">${c.k === "X" ? t("custom") : (lang === "ar" ? c.ar : c.en) + " · " + c.r + "%"}</option>`).join("");
+  sel.value = v; if(!$("vRate").value) $("vRate").value = COUNTRIES.find(c => c.k === sel.value).r;
+}
+$("vCountry").addEventListener("change", () => { const c = COUNTRIES.find(c => c.k === $("vCountry").value); if(c.r != null) $("vRate").value = c.r; renderVat(); });
+$("vRate").addEventListener("input", () => { const r = +$("vRate").value; const c = COUNTRIES.find(c => c.k === $("vCountry").value); if(c.r !== r) $("vCountry").value = "X"; renderVat(); });
+$("vAmount").addEventListener("input", renderVat);
+document.querySelectorAll("#vMode button").forEach(b => b.addEventListener("click", () => { vMode = b.dataset.mode; renderVat(); }));
+function vatCur(){ const c = COUNTRIES.find(c => c.k === $("vCountry").value); return c && c.c ? c.c : $("wCur").value; }
+function renderVat(){
+  document.querySelectorAll("#vMode button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === vMode));
+  $("vAmtLbl").textContent = t(vMode === "add" ? "vAmtNet" : "vAmtGross");
+  const rate = parseFloat($("vRate").value); $("vTaxLbl").textContent = t("vTax", isNaN(rate) ? 0 : rate);
+  const v = parseAmount($("vAmount").value), cur = vatCur();
+  if(isNaN(v) || isNaN(rate) || Math.abs(v) > MAX){ $("vErr").hidden = !$("vAmount").value.trim(); $("vErr").textContent = t("errAmount"); ["vNet","vTax","vGross"].forEach(i => $(i).textContent = "—"); $("vWords").textContent = ""; return; }
+  $("vErr").hidden = true;
+  const dec = CUR[cur] && CUR[cur].div === 1000 ? 3 : 2;
+  const res = vat(v, rate, vMode); ["net","tax","gross"].forEach(k => res[k] = round(res[k], dec));
+  if(vMode === "remove") res.tax = round(res.gross - res.net, dec);
+  $("vNet").textContent = cur + " " + fmtNum(res.net, cur);
+  $("vTax").textContent = cur + " " + fmtNum(res.tax, cur);
+  $("vGross").textContent = cur + " " + fmtNum(res.gross, cur);
+  $("vWords").textContent = lang === "ar" ? tafqeet(res.gross, cur) : enWords(res.gross, cur);
+  $("vWords").dir = lang === "ar" ? "rtl" : "ltr"; $("vWords").classList.toggle("en", lang !== "ar");
+  renderVat.last = { res, cur, rate };
+}
+$("vCopy").addEventListener("click", () => {
+  const l = renderVat.last; if(!l) return; const { res, cur, rate } = l;
+  const lines = lang === "ar"
+    ? [`المبلغ قبل الضريبة: ${cur} ${fmtNum(res.net, cur)}`, `ضريبة القيمة المضافة (${rate}%): ${cur} ${fmtNum(res.tax, cur)}`, `الإجمالي: ${cur} ${fmtNum(res.gross, cur)}`, tafqeet(res.gross, cur)]
+    : [`Subtotal: ${cur} ${fmtNum(res.net, cur)}`, `VAT (${rate}%): ${cur} ${fmtNum(res.tax, cur)}`, `Total: ${cur} ${fmtNum(res.gross, cur)}`, enWords(res.gross, cur)];
+  copyText(lines.join("\n"));
+});
+
+/* ---------- Hijri ---------- */
+let hMode = "g2h";
+const MONTHS = () => lang === "ar" ? HIJRI_MONTHS_AR : HIJRI_MONTHS_EN;
+function hijriStr(h){ return lang === "ar" ? `${h.d} ${HIJRI_MONTHS_AR[h.m - 1]} ${h.y} ${t("hSuffixH")}` : `${h.d} ${HIJRI_MONTHS_EN[h.m - 1]} ${h.y} AH`; }
+function gregStr(d){ return d.toLocaleDateString(lang === "ar" ? "ar-u-nu-latn" : "en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) + (lang === "ar" ? " م" : ""); }
+function weekday(d){ return d.toLocaleDateString(lang === "ar" ? "ar" : "en-GB", { weekday: "long", timeZone: "UTC" }); }
+function fillHijriSelects(){
+  const m = $("hM").value || null;
+  $("hM").innerHTML = MONTHS().map((n, i) => `<option value="${i + 1}">${i + 1} · ${n}</option>`).join("");
+  if(m) $("hM").value = m;
+}
+function fillDays(){
+  const y = +$("hY").value, m = +$("hM").value, cur = +$("hD").value || 1;
+  const len = y >= 1300 && y <= 1600 ? hijriMonthLength(y, m) : 30;
+  $("hD").innerHTML = Array.from({ length: len }, (_, i) => `<option value="${i + 1}">${i + 1}</option>`).join("");
+  $("hD").value = Math.min(cur, len);
+}
+document.querySelectorAll("#hMode button").forEach(b => b.addEventListener("click", () => { hMode = b.dataset.mode; renderHijri(); }));
+$("hGIn").addEventListener("input", renderHijri);
+$("hY").addEventListener("input", () => { fillDays(); renderHijri(); });
+$("hM").addEventListener("change", () => { fillDays(); renderHijri(); });
+$("hD").addEventListener("change", renderHijri);
+function todayUTC(){ const n = new Date(); return new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate())); }
+function renderHijri(){
+  document.querySelectorAll("#hMode button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === hMode));
+  $("hG2H").hidden = hMode !== "g2h"; $("hH2G").hidden = hMode !== "h2g";
+  const now = todayUTC(); $("hTodayH").textContent = hijriStr(toHijri(now)); $("hTodayG").textContent = weekday(now) + " · " + gregStr(now);
+  $("hErr").hidden = true;
+  if(hMode === "g2h"){
+    const v = $("hGIn").value; if(!v){ $("hOut").textContent = "—"; $("hOut2").textContent = ""; $("hWeekday").textContent = ""; return; }
+    const d = new Date(v + "T00:00:00Z");
+    if(d.getUTCFullYear() < 1937 || d.getUTCFullYear() > 2076){ $("hErr").hidden = false; $("hErr").textContent = lang === "ar" ? "اختر تاريخاً بين 1937 و2076." : "Pick a date between 1937 and 2076."; return; }
+    $("hOut").textContent = hijriStr(toHijri(d)); $("hOut2").textContent = gregStr(d); $("hWeekday").textContent = weekday(d);
+  } else {
+    const y = +$("hY").value, m = +$("hM").value, dd = +$("hD").value;
+    const g = y >= 1356 && y <= 1500 ? fromHijri(y, m, dd) : null;
+    if(!g){ $("hErr").hidden = false; $("hErr").textContent = lang === "ar" ? "أدخل سنة هجرية بين 1356 و1500." : "Enter a Hijri year between 1356 and 1500."; $("hOut").textContent = "—"; $("hOut2").textContent = ""; $("hWeekday").textContent = ""; return; }
+    $("hOut").textContent = gregStr(g); $("hOut2").textContent = hijriStr({ y, m, d: dd }); $("hWeekday").textContent = weekday(g);
+  }
+}
+
+/* ---------- digits ---------- */
+let dMode = "w";
+document.querySelectorAll("#dMode button").forEach(b => b.addEventListener("click", () => { dMode = b.dataset.mode; renderDigits(); }));
+$("dIn").addEventListener("input", renderDigits);
+function renderDigits(){
+  document.querySelectorAll("#dMode button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === dMode));
+  $("dOut").textContent = dMode === "w" ? toWestern($("dIn").value) : toArabicDigits($("dIn").value);
+  $("dOut").dir = "auto";
+}
+
+function renderAll(){ renderWords(); renderBatch(); renderVat(); renderHijri(); renderDigits(); }
+
+/* Paste your product page (e.g. Gumroad) here to show the Google Sheets add-on section */
+const ADDON_URL = "";
+if(ADDON_URL){ $("addonLink").href = ADDON_URL; document.querySelector("[data-addon]").hidden = false; }
+
+/* init */
+{ const n = new Date(); $("hGIn").value = `${n.getFullYear()}-${String(n.getMonth() + 1).padStart(2, "0")}-${String(n.getDate()).padStart(2, "0")}`; }
+const th = toHijri(todayUTC()); $("hY").value = th.y;
+applyLang(); $("hM").value = th.m; fillDays(); $("hD").value = th.d;
+$("bCur").value = $("wCur").value;
+showTab(tab); renderAll();
+})();
+</script>
+
+</body>
+</html>

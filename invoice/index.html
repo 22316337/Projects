@@ -1,0 +1,856 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ledgerline · Free Invoice, Quote & Receipt Maker</title>
+<meta name="description" content="Make professional invoices, quotes and receipts as PDF in a minute. Free, private, runs in your browser.">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+</head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+/* Layout: two-pane studio — editor ledger on the left, a live sheet of paper on the right; stacks with an Edit/Preview switch on phones */
+:root{
+  --bg:#eef0f3; --panel:#ffffff; --ink:#151a23; --muted:#5d6676; --line:#d9dde4; --soft:#f5f6f8;
+  --accent:#2445d6; --accent-ink:#ffffff; --accent-soft:#e6ebfd;
+  --good:#127a4a; --good-soft:#dff3e8; --warn:#9a5b00; --bad:#b4232a; --bad-soft:#fbe5e6;
+  --paper:#ffffff; --paper-ink:#1b1f27; --paper-muted:#6a7180; --paper-line:#e3e6eb; --paper-soft:#f6f7f9;
+  --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --f-body:"IBM Plex Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --f-mono:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1218; --panel:#171b23; --ink:#e7eaf0; --muted:#98a1b2; --line:#2a303c; --soft:#1d222c;
+  --accent:#7d95ff; --accent-ink:#0b1030; --accent-soft:#1f2747;
+  --good:#5fd39a; --good-soft:#123326; --warn:#f0b357; --bad:#ff8189; --bad-soft:#3a1a1d;
+  color-scheme:dark;
+}}
+:root[data-theme="dark"]{
+  --bg:#0f1218; --panel:#171b23; --ink:#e7eaf0; --muted:#98a1b2; --line:#2a303c; --soft:#1d222c;
+  --accent:#7d95ff; --accent-ink:#0b1030; --accent-soft:#1f2747;
+  --good:#5fd39a; --good-soft:#123326; --warn:#f0b357; --bad:#ff8189; --bad-soft:#3a1a1d;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--bg);color:var(--ink)}
+body{font-family:var(--f-body);font-size:14px;line-height:1.45}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important;animation:none!important}}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top-in{max-width:1440px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.brand{display:flex;align-items:baseline;gap:8px;margin-right:auto}
+.brand b{font-family:var(--f-display);font-weight:800;font-size:20px;letter-spacing:-.02em}
+.brand b i{font-style:normal;color:var(--accent)}
+.brand span{color:var(--muted);font-size:12px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:8px;padding:8px 12px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn.small{padding:5px 9px;font-size:12.5px}
+.btn.danger{color:var(--bad)}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+
+.wrap{max-width:1440px;margin:0 auto;padding-inline:16px;padding-block:16px 48px;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:20px;align-items:start}
+.editor{display:flex;flex-direction:column;gap:14px;min-width:0}
+.previewcol{position:sticky;top:calc(env(safe-area-inset-top,0px) + 70px);min-width:0;display:flex;flex-direction:column;gap:10px}
+.switch{display:none}
+
+.banner{display:flex;gap:10px;align-items:center;flex-wrap:wrap;background:var(--accent-soft);border:1px solid color-mix(in srgb,var(--accent) 30%,transparent);border-radius:var(--r);padding:10px 12px}
+.banner p{margin:0;flex:1;min-width:200px}
+
+.sec{background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.sec>header{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 14px 0}
+.sec h2{margin:0;font-family:var(--f-display);font-size:15px;font-weight:700;letter-spacing:-.01em}
+.sec .body{padding:12px 14px 14px;display:grid;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+label.f{display:flex;flex-direction:column;gap:4px;min-width:0}
+label.f>span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+input[type=text],input[type=email],input[type=number],input[type=date],input[type=tel],select,textarea{width:100%;min-width:0;background:var(--soft);border:1px solid var(--line);border-radius:7px;padding:8px 10px}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none;background:var(--panel)}
+textarea{resize:vertical;min-height:62px}
+.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+.seg{display:inline-flex;background:var(--soft);border:1px solid var(--line);border-radius:8px;padding:3px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:6px 12px;border-radius:6px;cursor:pointer;font-weight:500;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgb(0 0 0 / .12)}
+
+.items{display:flex;flex-direction:column;gap:8px}
+.itemhead,.item{display:grid;grid-template-columns:minmax(0,1fr) 70px 110px 100px 32px;gap:8px;align-items:center}
+.itemhead{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600;padding:0 2px}
+.itemhead .r,.item .amt{text-align:right}
+.item .amt{font-family:var(--f-mono);font-variant-numeric:tabular-nums;font-size:13px}
+.iconbtn{width:32px;height:32px;border:1px solid transparent;background:transparent;border-radius:7px;cursor:pointer;color:var(--muted);display:grid;place-items:center}
+.iconbtn:hover{border-color:var(--line);color:var(--bad)}
+.totals-mini{display:flex;justify-content:flex-end;gap:18px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:10px;color:var(--muted)}
+.totals-mini b{color:var(--ink);font-family:var(--f-mono)}
+
+.swatches{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw{width:28px;height:28px;border-radius:50%;border:2px solid var(--panel);box-shadow:0 0 0 1px var(--line);cursor:pointer}
+.sw[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:7px;background:var(--soft);padding:2px;cursor:pointer}
+.logo-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.logo-thumb{width:56px;height:56px;border:1px dashed var(--line);border-radius:8px;display:grid;place-items:center;overflow:hidden;color:var(--muted);font-size:11px;background:var(--soft)}
+.logo-thumb img{max-width:100%;max-height:100%;object-fit:contain}
+.check{display:flex;gap:8px;align-items:center;cursor:pointer}
+
+.hist{display:flex;flex-direction:column}
+.hrow{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:9px 0;border-top:1px solid var(--line)}
+.hrow:first-child{border-top:0}
+.hrow .who{min-width:0}
+.hrow .who b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hrow .who small{color:var(--muted)}
+.pill{font-size:11px;font-weight:600;padding:2px 8px;border-radius:99px;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
+.pill.paid{background:var(--good-soft);color:var(--good)}
+.pill.due{background:var(--soft);color:var(--muted);border:1px solid var(--line)}
+.pill.over{background:var(--bad-soft);color:var(--bad)}
+.pill.quote{background:var(--accent-soft);color:var(--accent)}
+.hacts{display:flex;gap:6px}
+.empty{color:var(--muted);padding:6px 0;margin:0}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.stat{background:var(--soft);border-radius:8px;padding:8px 10px;min-width:0}
+.stat small{display:block;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.stat b{font-family:var(--f-mono);font-size:14px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+
+.pv-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.pv-bar .lbl{color:var(--muted);font-size:12px;margin-right:auto}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 14px;border-radius:8px;opacity:0;pointer-events:none;transition:.2s;z-index:50;max-width:calc(100% - 32px)}
+.toast.show{opacity:1;transform:translateX(-50%)}
+
+/* ===== The paper ===== */
+.paper-scroll{overflow:auto;border-radius:6px;max-height:calc(100vh - 140px)}
+.paper{--pa:#2445d6;background:var(--paper);color:var(--paper-ink);border-radius:4px;box-shadow:0 1px 2px rgb(0 0 0 / .08),0 12px 32px -12px rgb(20 30 60 / .25);padding:7% 7.5%;font-family:var(--f-body);font-size:12px;line-height:1.5;position:relative;aspect-ratio:210/297;min-height:min-content;overflow:hidden}
+.paper.t-bold{padding-top:0}
+.p-band{display:none}
+.t-bold .p-band{display:block;background:var(--pa);margin:0 -8.2% 26px;height:10px}
+.p-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.p-logo{max-height:56px;max-width:160px;object-fit:contain;margin-bottom:8px;display:block}
+.p-biz{font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:-.01em}
+.p-small{color:var(--paper-muted);white-space:pre-line;font-size:11px}
+.p-title{font-family:var(--f-display);font-weight:800;font-size:30px;letter-spacing:-.02em;color:var(--pa);text-align:right;line-height:1;text-transform:uppercase}
+.t-minimal .p-title{color:var(--paper-ink);font-weight:500;font-size:24px;letter-spacing:.12em}
+.p-meta{margin-top:10px;display:grid;grid-template-columns:auto auto;gap:2px 14px;justify-content:end;font-size:11px}
+.p-meta dt{color:var(--paper-muted);text-align:right}
+.p-meta dd{margin:0;font-family:var(--f-mono);text-align:right}
+.p-parties{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:26px 0 18px}
+.p-lab{font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--pa);font-weight:600;margin-bottom:4px}
+.t-minimal .p-lab{color:var(--paper-muted)}
+.p-name{font-weight:600}
+table.p-items{width:100%;border-collapse:collapse;font-size:11.5px}
+.p-items th{text-align:left;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;padding:7px 8px;border-bottom:1.5px solid var(--paper-ink)}
+.t-bold .p-items th{background:var(--pa);color:#fff;border-bottom:0}
+.p-items td{padding:8px;border-bottom:1px solid var(--paper-line);vertical-align:top}
+.p-items .r{text-align:right;font-family:var(--f-mono);white-space:nowrap}
+.p-items th.r{font-family:var(--f-body)}
+.p-sum{display:flex;justify-content:flex-end;margin-top:12px}
+.p-sum dl{display:grid;grid-template-columns:auto auto;gap:4px 28px;margin:0;min-width:46%}
+.p-sum dt{color:var(--paper-muted)}
+.p-sum dd{margin:0;text-align:right;font-family:var(--f-mono)}
+.p-sum .grand{border-top:1.5px solid var(--paper-ink);padding-top:7px;margin-top:3px;font-weight:700;font-size:13.5px;color:var(--paper-ink)}
+.p-sum .grand.dd{color:var(--pa)}
+.t-minimal .p-sum .grand.dd{color:var(--paper-ink)}
+.p-foot{margin-top:24px;display:grid;grid-template-columns:1fr 1fr;gap:20px;font-size:11px}
+.p-foot p{margin:0;white-space:pre-line;color:var(--paper-muted)}
+.p-stamp{position:absolute;right:9%;top:34%;transform:rotate(-12deg);border:3px solid #127a4a;color:#127a4a;font-family:var(--f-display);font-weight:800;font-size:30px;padding:2px 14px;border-radius:6px;letter-spacing:.08em;opacity:.8}
+
+@media (max-width: 980px){
+  .wrap{grid-template-columns:minmax(0,1fr)}
+  .previewcol{position:static}
+  .switch{display:flex;justify-content:center;padding-inline:16px;padding-block:10px 0}
+  body[data-view="edit"] .previewcol{display:none}
+  body[data-view="preview"] .editor{display:none}
+  .paper-scroll{max-height:none}
+}
+@media (max-width: 560px){
+  .grid2,.grid3,.grid4{grid-template-columns:1fr 1fr}
+  .itemhead{display:none}
+  .item{grid-template-columns:1fr 1fr 32px;grid-template-areas:"d d x" "q p p" "a a a";background:var(--soft);padding:8px;border-radius:8px}
+  .item .d{grid-area:d}.item .q{grid-area:q}.item .p{grid-area:p}.item .amt{grid-area:a}.item .iconbtn{grid-area:x}
+  .paper{font-size:9.5px;aspect-ratio:auto}
+  .p-title{font-size:20px}.p-biz{font-size:13px}
+  .p-parties,.p-foot{grid-template-columns:1fr}
+  .stats{grid-template-columns:1fr}
+  .brand span{display:none}
+}
+</style>
+
+<div class="top"><div class="top-in">
+  <div class="brand"><b>Ledger<i>line</i></b><span>Invoices &amp; quotes, private to your browser</span></div>
+  <button class="btn ghost" id="btnNew" type="button">New</button>
+  <button class="btn" id="btnSave" type="button">Save</button>
+  <button class="btn primary" id="btnPdf" type="button">Download PDF</button>
+</div></div>
+
+<div class="switch"><div class="seg" role="group" aria-label="View">
+  <button type="button" data-view="edit" aria-pressed="true">Edit</button>
+  <button type="button" data-view="preview" aria-pressed="false">Preview</button>
+</div></div>
+
+<main class="wrap">
+  <div class="editor">
+    <div class="banner" id="sampleBanner" hidden>
+      <p><b>This is a sample invoice.</b> Replace it with your own details, or start from a blank page.</p>
+      <button class="btn small" id="btnBlank" type="button">Start blank</button>
+    </div>
+
+    <section class="sec">
+      <header><h2>Document</h2>
+        <div class="seg" role="group" aria-label="Document type" id="typeSeg">
+          <button type="button" data-type="invoice">Invoice</button>
+          <button type="button" data-type="quote">Quote</button>
+          <button type="button" data-type="receipt">Receipt</button>
+        </div>
+      </header>
+      <div class="body">
+        <div class="grid4">
+          <label class="f"><span>Number</span><input type="text" id="number" class="num"></label>
+          <label class="f"><span>Issue date</span><input type="date" id="issue"></label>
+          <label class="f"><span id="dueLbl">Due date</span><input type="date" id="due"></label>
+          <label class="f"><span>Terms</span>
+            <select id="terms">
+              <option value="0">On receipt</option><option value="7">Net 7</option><option value="14">Net 14</option>
+              <option value="30">Net 30</option><option value="60">Net 60</option><option value="custom">Custom</option>
+            </select></label>
+        </div>
+        <div class="grid2">
+          <label class="f"><span>Currency</span><select id="currency"></select></label>
+          <label class="f"><span>PO / Reference</span><input type="text" id="ref" placeholder="Optional"></label>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <header><h2>From (you)</h2><small style="color:var(--muted)">Remembered for next time</small></header>
+      <div class="body">
+        <div class="logo-row">
+          <div class="logo-thumb" id="logoThumb">Logo</div>
+          <label class="btn small" for="logoFile" style="cursor:pointer">Upload logo</label>
+          <input type="file" id="logoFile" accept="image/*" hidden>
+          <button class="btn small ghost" id="logoClear" type="button" hidden>Remove</button>
+        </div>
+        <div class="grid2">
+          <label class="f"><span>Business or your name</span><input type="text" id="fromName"></label>
+          <label class="f"><span>Email</span><input type="email" id="fromEmail"></label>
+          <label class="f"><span>Phone</span><input type="tel" id="fromPhone"></label>
+          <label class="f"><span>Tax / VAT ID</span><input type="text" id="fromTax"></label>
+        </div>
+        <label class="f"><span>Address</span><textarea id="fromAddr" rows="2"></textarea></label>
+      </div>
+    </section>
+
+    <section class="sec">
+      <header><h2>Bill to</h2>
+        <select id="clientPick" aria-label="Saved clients" style="width:auto;max-width:55%"><option value="">Saved clients…</option></select>
+      </header>
+      <div class="body">
+        <div class="grid2">
+          <label class="f"><span>Client name</span><input type="text" id="toName"></label>
+          <label class="f"><span>Email</span><input type="email" id="toEmail"></label>
+        </div>
+        <label class="f"><span>Address</span><textarea id="toAddr" rows="2"></textarea></label>
+      </div>
+    </section>
+
+    <section class="sec">
+      <header><h2>Line items</h2><button class="btn small" id="addItem" type="button">+ Add item</button></header>
+      <div class="body">
+        <div class="items">
+          <div class="itemhead"><span>Description</span><span>Qty</span><span>Unit price</span><span class="r">Amount</span><span></span></div>
+          <div id="itemList" class="items"></div>
+        </div>
+        <div class="grid4">
+          <label class="f"><span>Tax label</span><input type="text" id="taxLabel"></label>
+          <label class="f"><span>Tax rate %</span><input type="number" id="taxRate" min="0" step="0.01" class="num"></label>
+          <label class="f"><span>Discount</span>
+            <div style="display:flex;gap:4px"><input type="number" id="discVal" min="0" step="0.01" class="num">
+            <select id="discType" style="width:64px"><option value="pct">%</option><option value="amt">Amt</option></select></div></label>
+          <label class="f"><span>Shipping</span><input type="number" id="shipping" min="0" step="0.01" class="num"></label>
+        </div>
+        <div class="grid2">
+          <label class="f"><span>Amount already paid</span><input type="number" id="paidAmt" min="0" step="0.01" class="num"></label>
+          <label class="check" style="align-self:end;padding-bottom:8px"><input type="checkbox" id="paid"> Mark as paid in full</label>
+        </div>
+        <div class="totals-mini"><span>Subtotal <b id="mSub">0</b></span><span>Total <b id="mTot">0</b></span><span>Balance due <b id="mBal">0</b></span></div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <header><h2>Notes &amp; payment</h2></header>
+      <div class="body">
+        <label class="f"><span>How to pay you</span><textarea id="payment" rows="3" placeholder="Bank name, IBAN, SWIFT, PayPal, etc."></textarea></label>
+        <label class="f"><span>Notes / terms</span><textarea id="notes" rows="2"></textarea></label>
+      </div>
+    </section>
+
+    <section class="sec">
+      <header><h2>Look</h2>
+        <div class="seg" role="group" aria-label="Template" id="tplSeg">
+          <button type="button" data-tpl="classic">Classic</button>
+          <button type="button" data-tpl="bold">Bold</button>
+          <button type="button" data-tpl="minimal">Minimal</button>
+        </div>
+      </header>
+      <div class="body">
+        <div class="swatches" id="swatches"><input type="color" id="accentCustom" aria-label="Custom brand color"></div>
+      </div>
+    </section>
+
+    <section class="sec">
+      <header><h2>Your documents</h2>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn small" id="btnExport" type="button">Back up</button>
+          <label class="btn small" for="importFile" style="cursor:pointer">Restore</label>
+          <input type="file" id="importFile" accept=".json,application/json" hidden>
+        </div>
+      </header>
+      <div class="body">
+        <div class="stats">
+          <div class="stat"><small>Outstanding</small><b id="sOut">–</b></div>
+          <div class="stat"><small>Overdue</small><b id="sOver">–</b></div>
+          <div class="stat"><small>Paid</small><b id="sPaid">–</b></div>
+        </div>
+        <div class="hist" id="hist"></div>
+        <small style="color:var(--muted)">Stored only in this browser. Use Back up to keep a copy.</small>
+      </div>
+    </section>
+  </div>
+
+  <aside class="previewcol" aria-label="Preview">
+    <div class="pv-bar"><span class="lbl" id="pvLbl">Live preview · A4</span>
+      <button class="btn small" id="btnDup" type="button">Duplicate</button>
+      <button class="btn small" id="btnConvert" type="button" hidden>Convert to invoice</button>
+    </div>
+    <div class="paper-scroll"><div class="paper" id="paper"></div></div>
+  </aside>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+};
+const CURRENCIES = ["USD","EUR","GBP","AED","SAR","QAR","KWD","TRY","MAD","EGP","JOD","INR","PKR","CAD","AUD","CHF","JPY","CNY","SGD","ZAR","NGN","BRL","MXN","RON"];
+const ACCENTS = ["#2445d6","#0f766e","#b4232a","#7c3aed","#c2410c","#111827"];
+const PREFIX = {invoice:"INV", quote:"QUO", receipt:"REC"};
+const TITLE = {invoice:"Invoice", quote:"Quote", receipt:"Receipt"};
+const today = () => new Date().toISOString().slice(0,10);
+const addDays = (iso, n) => { const d = new Date(iso + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0,10); };
+const uid = () => Math.random().toString(36).slice(2,10) + Date.now().toString(36);
+const r2 = n => Math.round((Number(n) || 0) * 100) / 100;
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+function nextNumber(type){
+  const counters = store.get("ll.counters", {});
+  const n = (counters[type] || 0) + 1;
+  return PREFIX[type] + "-" + String(n).padStart(4, "0");
+}
+function bumpCounter(type, number){
+  const m = String(number).match(/(\d+)\s*$/); if(!m) return;
+  const counters = store.get("ll.counters", {});
+  counters[type] = Math.max(counters[type] || 0, parseInt(m[1], 10));
+  store.set("ll.counters", counters);
+}
+
+function profile(){ return store.get("ll.profile", null); }
+function blankDoc(type = "invoice"){
+  const p = profile() || {};
+  const iss = today();
+  return { id: uid(), type, number: nextNumber(type), issue: iss, terms: "30", due: addDays(iss, 30), ref: "",
+    currency: p.currency || "USD",
+    from: { name: p.name || "", email: p.email || "", phone: p.phone || "", tax: p.tax || "", addr: p.addr || "" },
+    logo: p.logo || "",
+    to: { name: "", email: "", addr: "" },
+    items: [{ d: "", q: 1, p: 0 }],
+    taxLabel: p.taxLabel || "Tax", taxRate: p.taxRate ?? 0, discType: "pct", discVal: 0, shipping: 0, paidAmt: 0, paid: false,
+    payment: p.payment || "", notes: p.notes || "Thank you for your business.",
+    template: p.template || "classic", accent: p.accent || ACCENTS[0], sample: false };
+}
+function sampleDoc(){
+  const iss = today();
+  return { id: uid(), type: "invoice", number: "INV-0001", issue: iss, terms: "14", due: addDays(iss, 14), ref: "PO-2231",
+    currency: "USD",
+    from: { name: "Northlight Studio", email: "hello@northlight.example", phone: "+1 555 0142", tax: "VAT 00-123456", addr: "42 Harbor Street\nPortland, OR 97201" },
+    logo: "",
+    to: { name: "Acme Outdoor Co.", email: "accounts@acme.example", addr: "900 Summit Ave, Suite 4\nDenver, CO 80202" },
+    items: [
+      { d: "Website redesign — discovery & wireframes", q: 1, p: 1200 },
+      { d: "Front-end development (hours)", q: 18, p: 65 },
+      { d: "Product photography retouching", q: 24, p: 8.5 }
+    ],
+    taxLabel: "Sales tax", taxRate: 8, discType: "pct", discVal: 5, shipping: 0, paidAmt: 500, paid: false,
+    payment: "Bank: Example Federal\nAccount name: Northlight Studio\nIBAN: XX00 0000 0000 0000\nOr pay by card via the link in your email.",
+    notes: "Payment due within 14 days. Thank you for working with us!",
+    template: "classic", accent: ACCENTS[0], sample: true };
+}
+
+let doc = store.get("ll.draft", null) || (store.get("ll.docs", []).length || profile() ? blankDoc() : sampleDoc());
+let dirty = false;
+
+function calc(d = doc){
+  const lines = d.items.map(it => r2((Number(it.q) || 0) * (Number(it.p) || 0)));
+  const sub = r2(lines.reduce((a, b) => a + b, 0));
+  const disc = r2(d.discType === "pct" ? sub * (Number(d.discVal) || 0) / 100 : Math.min(Number(d.discVal) || 0, sub));
+  const taxable = r2(sub - disc);
+  const tax = r2(taxable * (Number(d.taxRate) || 0) / 100);
+  const ship = r2(d.shipping);
+  const total = r2(taxable + tax + ship);
+  const paid = d.paid || d.type === "receipt" ? total : Math.min(r2(d.paidAmt), total);
+  return { lines, sub, disc, tax, ship, total, paid, bal: r2(total - paid) };
+}
+function money(n, cur = doc.currency){
+  try{ return new Intl.NumberFormat(undefined, { style: "currency", currency: cur }).format(n); }
+  catch(e){ return cur + " " + (Number(n) || 0).toFixed(2); }
+}
+function pdfMoney(n, cur){
+  const s = money(n, cur);
+  if(/^[\x20-\x7E -ÿ€]*$/.test(s)) return s.replace(/ | /g, " ");
+  try{ return new Intl.NumberFormat("en-US", { style: "currency", currency: cur, currencyDisplay: "code" }).format(n).replace(/ /g, " "); }
+  catch(e){ return cur + " " + n.toFixed(2); }
+}
+function fmtDate(iso){
+  if(!iso) return "";
+  try{ return new Date(iso + "T00:00:00").toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" }); }catch(e){ return iso; }
+}
+function status(d){
+  if(d.type === "quote") return { k: "quote", t: "Quote" };
+  if(d.type === "receipt" || d.paid || calc(d).bal <= 0) return { k: "paid", t: "Paid" };
+  if(d.due && d.due < today()) return { k: "over", t: "Overdue" };
+  return { k: "due", t: "Unpaid" };
+}
+
+/* ---------- form binding ---------- */
+const bind = [
+  ["number", "number"], ["issue", "issue"], ["due", "due"], ["ref", "ref"], ["currency", "currency"],
+  ["fromName", "from.name"], ["fromEmail", "from.email"], ["fromPhone", "from.phone"], ["fromTax", "from.tax"], ["fromAddr", "from.addr"],
+  ["toName", "to.name"], ["toEmail", "to.email"], ["toAddr", "to.addr"],
+  ["taxLabel", "taxLabel"], ["taxRate", "taxRate"], ["discVal", "discVal"], ["discType", "discType"], ["shipping", "shipping"],
+  ["paidAmt", "paidAmt"], ["payment", "payment"], ["notes", "notes"]
+];
+const getP = (o, p) => p.split(".").reduce((a, k) => a?.[k], o);
+const setP = (o, p, v) => { const ks = p.split("."); const last = ks.pop(); ks.reduce((a, k) => a[k], o)[last] = v; };
+
+$("currency").innerHTML = CURRENCIES.map(c => `<option value="${c}">${c}</option>`).join("");
+
+function fillForm(){
+  bind.forEach(([id, p]) => { const v = getP(doc, p); $(id).value = v ?? ""; });
+  $("terms").value = doc.terms; $("paid").checked = !!doc.paid;
+  document.querySelectorAll("#typeSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.type === doc.type));
+  document.querySelectorAll("#tplSeg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.tpl === doc.template));
+  $("dueLbl").textContent = doc.type === "quote" ? "Valid until" : doc.type === "receipt" ? "Paid on" : "Due date";
+  $("sampleBanner").hidden = !doc.sample;
+  renderItems(); renderLogo(); renderSwatches();
+}
+bind.forEach(([id, p]) => {
+  $(id).addEventListener("input", e => {
+    let v = e.target.value;
+    if(e.target.type === "number") v = v === "" ? 0 : Number(v);
+    setP(doc, p, v);
+    if(id === "due") $("terms").value = "custom", doc.terms = "custom";
+    if(id === "issue" && doc.terms !== "custom") { doc.due = addDays(doc.issue, +doc.terms); $("due").value = doc.due; }
+    changed();
+  });
+});
+$("terms").addEventListener("change", e => { doc.terms = e.target.value; if(doc.terms !== "custom"){ doc.due = addDays(doc.issue, +doc.terms); $("due").value = doc.due; } changed(); });
+$("paid").addEventListener("change", e => { doc.paid = e.target.checked; changed(); });
+document.querySelectorAll("#typeSeg button").forEach(b => b.addEventListener("click", () => {
+  if(doc.type === b.dataset.type) return;
+  const wasAuto = doc.number === nextNumber(doc.type) || /^(INV|QUO|REC)-\d+$/.test(doc.number);
+  doc.type = b.dataset.type;
+  if(wasAuto) doc.number = nextNumber(doc.type);
+  if(doc.type === "receipt") doc.due = doc.due || today();
+  fillForm(); changed();
+}));
+document.querySelectorAll("#tplSeg button").forEach(b => b.addEventListener("click", () => { doc.template = b.dataset.tpl; fillForm(); changed(); }));
+
+/* items */
+function renderItems(){
+  const list = $("itemList"); list.innerHTML = "";
+  const { lines } = calc();
+  doc.items.forEach((it, i) => {
+    const row = document.createElement("div"); row.className = "item";
+    row.innerHTML = `<input type="text" class="d" id="it-d-${i}" placeholder="What did you do or sell?" aria-label="Description">
+      <input type="number" class="q num" id="it-q-${i}" min="0" step="any" aria-label="Quantity">
+      <input type="number" class="p num" id="it-p-${i}" min="0" step="0.01" aria-label="Unit price">
+      <span class="amt" id="it-a-${i}"></span>
+      <button class="iconbtn" type="button" aria-label="Remove item" title="Remove item">✕</button>`;
+    row.querySelector(".d").value = it.d; row.querySelector(".q").value = it.q; row.querySelector(".p").value = it.p;
+    row.querySelector(".amt").textContent = money(lines[i]);
+    row.querySelector(".d").addEventListener("input", e => { it.d = e.target.value; changed(); });
+    row.querySelector(".q").addEventListener("input", e => { it.q = Number(e.target.value) || 0; changed(); });
+    row.querySelector(".p").addEventListener("input", e => { it.p = Number(e.target.value) || 0; changed(); });
+    row.querySelector(".iconbtn").addEventListener("click", () => { doc.items.splice(i, 1); if(!doc.items.length) doc.items.push({ d: "", q: 1, p: 0 }); renderItems(); changed(); });
+    list.appendChild(row);
+  });
+}
+$("addItem").addEventListener("click", () => { doc.items.push({ d: "", q: 1, p: 0 }); renderItems(); changed(); $("it-d-" + (doc.items.length - 1)).focus(); });
+
+/* logo */
+function renderLogo(){
+  $("logoThumb").innerHTML = doc.logo ? `<img alt="Logo" src="${doc.logo}">` : "Logo";
+  $("logoClear").hidden = !doc.logo;
+}
+$("logoFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if(!f) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, 600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas"); c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      doc.logo = c.toDataURL("image/png"); renderLogo(); changed();
+    };
+    img.onerror = () => toast("That image couldn't be read. Try a PNG or JPG.");
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(f); e.target.value = "";
+});
+$("logoClear").addEventListener("click", () => { doc.logo = ""; renderLogo(); changed(); });
+
+/* accent */
+function renderSwatches(){
+  const box = $("swatches"); box.querySelectorAll(".sw").forEach(n => n.remove());
+  ACCENTS.forEach(c => {
+    const b = document.createElement("button"); b.type = "button"; b.className = "sw"; b.style.background = c;
+    b.setAttribute("aria-label", "Brand color " + c); b.setAttribute("aria-pressed", c.toLowerCase() === doc.accent.toLowerCase());
+    b.addEventListener("click", () => { doc.accent = c; renderSwatches(); changed(); });
+    box.insertBefore(b, $("accentCustom"));
+  });
+  $("accentCustom").value = doc.accent;
+}
+$("accentCustom").addEventListener("input", e => { doc.accent = e.target.value; renderSwatches(); changed(); });
+
+/* clients */
+function renderClients(){
+  const cs = store.get("ll.clients", []);
+  $("clientPick").innerHTML = `<option value="">${cs.length ? "Saved clients…" : "No saved clients yet"}</option>` +
+    cs.map((c, i) => `<option value="${i}">${esc(c.name)}</option>`).join("");
+}
+$("clientPick").addEventListener("change", e => {
+  const c = store.get("ll.clients", [])[e.target.value]; if(!c) return;
+  doc.to = { name: c.name, email: c.email, addr: c.addr }; fillForm(); changed(); e.target.value = "";
+});
+
+/* ---------- preview ---------- */
+function renderPreview(){
+  const c = calc(); const st = status(doc);
+  const p = $("paper");
+  p.className = "paper t-" + doc.template; p.style.setProperty("--pa", doc.accent);
+  const fromLines = [doc.from.addr, doc.from.email, doc.from.phone, doc.from.tax].filter(Boolean).join("\n");
+  const toLines = [doc.to.addr, doc.to.email].filter(Boolean).join("\n");
+  const dueLabel = doc.type === "quote" ? "Valid until" : doc.type === "receipt" ? "Paid on" : "Due";
+  const rows = doc.items.filter(it => it.d || it.p).map((it, i) => `<tr><td>${esc(it.d)}</td><td class="r">${esc(it.q)}</td><td class="r">${esc(money(it.p))}</td><td class="r">${esc(money(r2(it.q * it.p)))}</td></tr>`).join("")
+    || `<tr><td colspan="4" style="color:var(--paper-muted)">Add your first line item on the left.</td></tr>`;
+  const showBal = doc.type === "invoice";
+  p.innerHTML = `<div class="p-band"></div>
+  <div class="p-head">
+    <div>${doc.logo ? `<img class="p-logo" alt="" src="${doc.logo}">` : ""}<div class="p-biz">${esc(doc.from.name || "Your business")}</div><div class="p-small">${esc(fromLines)}</div></div>
+    <div><div class="p-title">${TITLE[doc.type]}</div>
+      <dl class="p-meta"><dt>No.</dt><dd>${esc(doc.number)}</dd><dt>Issued</dt><dd>${esc(fmtDate(doc.issue))}</dd>
+      ${doc.due ? `<dt>${dueLabel}</dt><dd>${esc(fmtDate(doc.due))}</dd>` : ""}${doc.ref ? `<dt>Ref</dt><dd>${esc(doc.ref)}</dd>` : ""}</dl></div>
+  </div>
+  <div class="p-parties">
+    <div><div class="p-lab">${doc.type === "quote" ? "Prepared for" : "Bill to"}</div><div class="p-name">${esc(doc.to.name || "Client name")}</div><div class="p-small">${esc(toLines)}</div></div>
+    <div style="text-align:right"><div class="p-lab">${showBal ? "Balance due" : "Total"}</div><div class="p-biz" style="font-size:20px;color:var(--pa)">${esc(money(showBal ? c.bal : c.total))}</div></div>
+  </div>
+  <table class="p-items"><thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Price</th><th class="r">Amount</th></tr></thead><tbody>${rows}</tbody></table>
+  <div class="p-sum"><dl>
+    <dt>Subtotal</dt><dd>${esc(money(c.sub))}</dd>
+    ${c.disc ? `<dt>Discount${doc.discType === "pct" ? " (" + r2(doc.discVal) + "%)" : ""}</dt><dd>−${esc(money(c.disc))}</dd>` : ""}
+    ${Number(doc.taxRate) ? `<dt>${esc(doc.taxLabel || "Tax")} (${r2(doc.taxRate)}%)</dt><dd>${esc(money(c.tax))}</dd>` : ""}
+    ${c.ship ? `<dt>Shipping</dt><dd>${esc(money(c.ship))}</dd>` : ""}
+    <dt class="grand">Total</dt><dd class="grand">${esc(money(c.total))}</dd>
+    ${showBal && c.paid ? `<dt>Paid</dt><dd>−${esc(money(c.paid))}</dd><dt class="grand dd">Balance due</dt><dd class="grand dd">${esc(money(c.bal))}</dd>` : ""}
+  </dl></div>
+  <div class="p-foot">
+    ${doc.payment ? `<div><div class="p-lab">Payment details</div><p>${esc(doc.payment)}</p></div>` : "<div></div>"}
+    ${doc.notes ? `<div><div class="p-lab">Notes</div><p>${esc(doc.notes)}</p></div>` : ""}
+  </div>
+  ${st.k === "paid" && doc.type !== "quote" ? `<div class="p-stamp">PAID</div>` : ""}`;
+  $("mSub").textContent = money(c.sub); $("mTot").textContent = money(c.total); $("mBal").textContent = money(c.bal);
+  doc.items.forEach((it, i) => { const a = $("it-a-" + i); if(a) a.textContent = money(c.lines[i]); });
+  $("btnConvert").hidden = doc.type !== "quote";
+  $("pvLbl").textContent = `Live preview · A4 · ${st.t}`;
+}
+
+let saveT;
+function changed(){
+  dirty = true; doc.sample = doc.sample && true;
+  renderPreview();
+  clearTimeout(saveT); saveT = setTimeout(() => store.set("ll.draft", doc), 300);
+}
+
+/* ---------- history ---------- */
+function docs(){ return store.get("ll.docs", []); }
+function saveDoc(silent){
+  const all = docs(); const i = all.findIndex(d => d.id === doc.id);
+  const copy = JSON.parse(JSON.stringify(doc)); copy.sample = false; copy.savedAt = Date.now();
+  if(i >= 0) all[i] = copy; else all.unshift(copy);
+  if(!store.set("ll.docs", all)){ toast("Couldn't save — this browser is blocking storage. Use Back up instead."); return; }
+  bumpCounter(doc.type, doc.number);
+  const pf = { name: doc.from.name, email: doc.from.email, phone: doc.from.phone, tax: doc.from.tax, addr: doc.from.addr, logo: doc.logo,
+    currency: doc.currency, taxLabel: doc.taxLabel, taxRate: doc.taxRate, payment: doc.payment, notes: doc.notes, template: doc.template, accent: doc.accent };
+  store.set("ll.profile", pf);
+  if(doc.to.name){
+    const cs = store.get("ll.clients", []).filter(c => c.name.toLowerCase() !== doc.to.name.toLowerCase());
+    cs.unshift({ ...doc.to }); store.set("ll.clients", cs.slice(0, 50));
+  }
+  doc.sample = false; $("sampleBanner").hidden = true; dirty = false;
+  renderHistory(); renderClients();
+  if(!silent) toast(`Saved ${TITLE[doc.type].toLowerCase()} ${doc.number}`);
+}
+let armed = null;
+function renderHistory(){
+  const all = docs(); const h = $("hist"); h.innerHTML = "";
+  const byCur = {};
+  all.forEach(d => { if(d.type !== "invoice") return; const s = status(d); const c = calc(d);
+    byCur[d.currency] ??= { out: 0, over: 0, paid: 0 };
+    if(s.k === "paid") byCur[d.currency].paid += c.total; else { byCur[d.currency].out += c.bal; if(s.k === "over") byCur[d.currency].over += c.bal; }
+  });
+  const cur = Object.keys(byCur).sort((a, b) => (byCur[b].out + byCur[b].paid) - (byCur[a].out + byCur[a].paid))[0];
+  $("sOut").textContent = cur ? money(byCur[cur].out, cur) : "–";
+  $("sOver").textContent = cur ? money(byCur[cur].over, cur) : "–";
+  $("sPaid").textContent = cur ? money(byCur[cur].paid, cur) : "–";
+  if(!all.length){ h.innerHTML = `<p class="empty">Nothing saved yet. Press Save to keep this document and its client.</p>`; return; }
+  all.forEach(d => {
+    const s = status(d); const row = document.createElement("div"); row.className = "hrow";
+    row.innerHTML = `<div class="who"><b>${esc(d.to.name || "Untitled client")}</b><small>${esc(d.number)} · ${esc(fmtDate(d.issue))} · <span class="num">${esc(money(calc(d).total, d.currency))}</span></small></div>
+      <span class="pill ${s.k}">${s.t}</span>
+      <div class="hacts"><button class="btn small" type="button" data-a="open">Open</button><button class="btn small danger" type="button" data-a="del">${armed === d.id ? "Confirm" : "Delete"}</button></div>`;
+    row.querySelector('[data-a="open"]').addEventListener("click", () => { if(dirty && !doc.sample) saveDoc(true); doc = JSON.parse(JSON.stringify(d)); fillForm(); renderPreview(); store.set("ll.draft", doc); dirty = false; toast("Opened " + d.number); showView("preview-if-mobile"); });
+    row.querySelector('[data-a="del"]').addEventListener("click", () => {
+      if(armed !== d.id){ armed = d.id; renderHistory(); setTimeout(() => { if(armed === d.id){ armed = null; renderHistory(); } }, 4000); return; }
+      armed = null; store.set("ll.docs", docs().filter(x => x.id !== d.id)); renderHistory(); toast("Deleted " + d.number);
+    });
+    h.appendChild(row);
+  });
+}
+
+/* ---------- actions ---------- */
+function newDoc(type){
+  if(dirty && !doc.sample) saveDoc(true);
+  doc = blankDoc(type || (doc.type === "receipt" ? "invoice" : doc.type)); dirty = false;
+  fillForm(); renderPreview(); store.set("ll.draft", doc);
+}
+$("btnNew").addEventListener("click", () => { newDoc(); toast("New " + TITLE[doc.type].toLowerCase() + " " + doc.number); });
+$("btnBlank").addEventListener("click", () => { doc.sample = false; newDoc("invoice"); });
+$("btnSave").addEventListener("click", () => saveDoc());
+$("btnDup").addEventListener("click", () => {
+  if(dirty && !doc.sample) saveDoc(true);
+  const c = JSON.parse(JSON.stringify(doc)); c.id = uid(); c.sample = false; c.number = nextNumber(c.type); c.issue = today();
+  if(c.terms !== "custom") c.due = addDays(c.issue, +c.terms); c.paid = false; c.paidAmt = 0;
+  doc = c; dirty = true; fillForm(); renderPreview(); toast("Duplicated as " + c.number);
+});
+$("btnConvert").addEventListener("click", () => {
+  if(dirty) saveDoc(true);
+  const c = JSON.parse(JSON.stringify(doc)); c.id = uid(); c.type = "invoice"; c.number = nextNumber("invoice"); c.issue = today();
+  c.terms = c.terms === "custom" ? "30" : c.terms; c.due = addDays(c.issue, +c.terms); c.ref = c.ref || doc.number;
+  doc = c; dirty = true; fillForm(); renderPreview(); toast("Quote converted to " + c.number);
+});
+document.addEventListener("keydown", e => { if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "s"){ e.preventDefault(); saveDoc(); } });
+
+/* mobile switch */
+function showView(v){
+  if(v === "preview-if-mobile"){ if(!matchMedia("(max-width: 980px)").matches) return; v = "preview"; }
+  document.body.dataset.view = v;
+  document.querySelectorAll(".switch button").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === v));
+  if(v === "preview") window.scrollTo({ top: 0 });
+}
+document.querySelectorAll(".switch button").forEach(b => b.addEventListener("click", () => showView(b.dataset.view)));
+document.body.dataset.view = "edit";
+
+let toastT;
+function toast(msg){ const t = $("toast"); t.textContent = msg; t.classList.add("show"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("show"), 2600); }
+
+/* ---------- downloads ---------- */
+let dl = null;
+const dlReady = (window.claude?.use ? window.claude.use("downloads") : Promise.resolve(null)).then(x => { dl = x; return x; }).catch(() => null);
+async function offer(filename, data){
+  const d = dl || await dlReady;
+  if(!d){
+    const blob = data instanceof Blob ? data : new Blob([data], { type: "application/octet-stream" });
+    const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; document.body.appendChild(a); a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); toast("Saved " + filename); return true;
+  }
+  try{ await d.save({ filename, data }); toast("Saved " + filename); return true; }
+  catch(err){
+    const code = err?.code;
+    if(code === "declined") return false;
+    if(code === "rate_limited") toast("A save prompt is already open.");
+    else toast("Couldn't save the file (" + (code || "error") + ").");
+    return false;
+  }
+}
+$("btnExport").addEventListener("click", () => {
+  const payload = { app: "ledgerline", v: 1, exportedAt: new Date().toISOString(), profile: profile(), clients: store.get("ll.clients", []), counters: store.get("ll.counters", {}), docs: docs() };
+  offer(`ledgerline-backup-${today()}.json`, JSON.stringify(payload, null, 2));
+});
+$("importFile").addEventListener("change", e => {
+  const f = e.target.files[0]; if(!f) return; e.target.value = "";
+  const fr = new FileReader();
+  fr.onload = () => {
+    try{
+      const j = JSON.parse(fr.result);
+      if(j.app !== "ledgerline" || !Array.isArray(j.docs)) throw 0;
+      const have = new Set(docs().map(d => d.id));
+      const merged = docs().concat(j.docs.filter(d => d && d.id && !have.has(d.id)));
+      store.set("ll.docs", merged);
+      if(j.profile && !profile()) store.set("ll.profile", j.profile);
+      const names = new Set(store.get("ll.clients", []).map(c => c.name.toLowerCase()));
+      store.set("ll.clients", store.get("ll.clients", []).concat((j.clients || []).filter(c => !names.has(String(c.name).toLowerCase()))));
+      const ctr = store.get("ll.counters", {}); Object.entries(j.counters || {}).forEach(([k, v]) => ctr[k] = Math.max(ctr[k] || 0, v)); store.set("ll.counters", ctr);
+      renderHistory(); renderClients(); toast(`Restored ${j.docs.length} documents`);
+    }catch(err){ toast("That file isn't a Ledgerline backup."); }
+  };
+  fr.readAsText(f);
+});
+
+/* ---------- PDF ---------- */
+function hexRgb(h){ const m = h.replace("#", ""); const n = parseInt(m.length === 3 ? m.split("").map(x => x + x).join("") : m, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+function pdfSafe(s){ return String(s ?? "").replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[–—−]/g, "-").replace(/…/g, "...").replace(/[^\x0A\x20-\x7E -ÿ€]/g, "?"); }
+function buildPdf(){
+  const { jsPDF } = window.jspdf;
+  const pdf = new jsPDF({ unit: "mm", format: "a4" });
+  const W = 210, H = 297, M = 18, acc = hexRgb(doc.accent), c = calc(), cur = doc.currency;
+  const ink = [27, 31, 39], muted = [106, 113, 128], line = [227, 230, 235];
+  const fm = n => pdfSafe(pdfMoney(n, cur));
+  const T = doc.template;
+  let y = M;
+  if(T === "bold"){ pdf.setFillColor(...acc); pdf.rect(0, 0, W, 5, "F"); y = M + 2; }
+
+  // left: logo + business
+  let ly = y;
+  if(doc.logo){
+    try{ const p = pdf.getImageProperties(doc.logo); const h = 16, w = Math.min(50, p.width / p.height * h); pdf.addImage(doc.logo, "PNG", M, ly, w, w / (p.width / p.height)); ly += w / (p.width / p.height) + 4; }catch(e){}
+  }
+  pdf.setFont("helvetica", "bold"); pdf.setFontSize(13); pdf.setTextColor(...ink);
+  pdf.text(pdfSafe(doc.from.name || "Your business"), M, ly + 4); ly += 9;
+  pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.setTextColor(...muted);
+  const fromL = pdf.splitTextToSize(pdfSafe([doc.from.addr, doc.from.email, doc.from.phone, doc.from.tax].filter(Boolean).join("\n")), 90);
+  pdf.text(fromL, M, ly); ly += fromL.length * 3.8;
+
+  // right: title + meta
+  pdf.setFont("helvetica", "bold"); pdf.setFontSize(T === "minimal" ? 20 : 26);
+  if(T === "minimal") pdf.setTextColor(...ink); else pdf.setTextColor(...acc);
+  pdf.text(TITLE[doc.type].toUpperCase(), W - M, y + 8, { align: "right", charSpace: T === "minimal" ? 1.5 : 0 });
+  let ry = y + 15; pdf.setFontSize(8.5);
+  const dueLabel = doc.type === "quote" ? "Valid until" : doc.type === "receipt" ? "Paid on" : "Due";
+  [["No.", doc.number], ["Issued", fmtDate(doc.issue)], doc.due ? [dueLabel, fmtDate(doc.due)] : null, doc.ref ? ["Ref", doc.ref] : null].filter(Boolean).forEach(([k, v]) => {
+    pdf.setFont("helvetica", "normal"); pdf.setTextColor(...muted); pdf.text(k, W - M - 42, ry, { align: "right" });
+    pdf.setTextColor(...ink); pdf.text(pdfSafe(v), W - M, ry, { align: "right" }); ry += 4.6;
+  });
+  y = Math.max(ly, ry) + 8;
+
+  // parties
+  const lab = (t, x, yy, align) => { pdf.setFont("helvetica", "bold"); pdf.setFontSize(7); if(T === "minimal") pdf.setTextColor(...muted); else pdf.setTextColor(...acc); pdf.text(t.toUpperCase(), x, yy, { align: align || "left", charSpace: 0.6 }); };
+  lab(doc.type === "quote" ? "Prepared for" : "Bill to", M, y);
+  pdf.setFont("helvetica", "bold"); pdf.setFontSize(10); pdf.setTextColor(...ink); pdf.text(pdfSafe(doc.to.name || "Client name"), M, y + 5);
+  pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.setTextColor(...muted);
+  const toL = pdf.splitTextToSize(pdfSafe([doc.to.addr, doc.to.email].filter(Boolean).join("\n")), 90); pdf.text(toL, M, y + 9.5);
+  const showBal = doc.type === "invoice";
+  lab(showBal ? "Balance due" : "Total", W - M, y, "right");
+  pdf.setFont("helvetica", "bold"); pdf.setFontSize(15); if(T === "minimal") pdf.setTextColor(...ink); else pdf.setTextColor(...acc);
+  pdf.text(fm(showBal ? c.bal : c.total), W - M, y + 7, { align: "right" });
+  y += Math.max(12 + toL.length * 3.8, 14) + 4;
+
+  // table
+  const cols = { d: M + 2, q: 132, p: 160, a: W - M - 2 };
+  const header = () => {
+    if(T === "bold"){ pdf.setFillColor(...acc); pdf.rect(M, y - 4.5, W - 2 * M, 7, "F"); pdf.setTextColor(255, 255, 255); }
+    else pdf.setTextColor(...ink);
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(7.5);
+    pdf.text("DESCRIPTION", cols.d, y); pdf.text("QTY", cols.q, y, { align: "right" }); pdf.text("PRICE", cols.p, y, { align: "right" }); pdf.text("AMOUNT", cols.a, y, { align: "right" });
+    if(T !== "bold"){ pdf.setDrawColor(...ink); pdf.setLineWidth(0.4); pdf.line(M, y + 2.2, W - M, y + 2.2); }
+    y += 7;
+  };
+  header();
+  const rows = doc.items.filter(it => it.d || it.p);
+  pdf.setFontSize(9);
+  rows.forEach(it => {
+    pdf.setFont("helvetica", "normal");
+    const dl = pdf.splitTextToSize(pdfSafe(it.d || "-"), cols.q - cols.d - 18);
+    const h = dl.length * 4 + 3;
+    if(y + h > H - 30){ pdf.addPage(); y = M + 4; header(); pdf.setFontSize(9); pdf.setFont("helvetica", "normal"); }
+    pdf.setTextColor(...ink);
+    pdf.text(dl, cols.d, y);
+    pdf.text(String(it.q), cols.q, y, { align: "right" }); pdf.text(fm(it.p), cols.p, y, { align: "right" }); pdf.text(fm(r2(it.q * it.p)), cols.a, y, { align: "right" });
+    y += h - 1; pdf.setDrawColor(...line); pdf.setLineWidth(0.2); pdf.line(M, y - 1.5, W - M, y - 1.5); y += 3.5;
+  });
+
+  // totals
+  const sumRows = [["Subtotal", fm(c.sub)]];
+  if(c.disc) sumRows.push([`Discount${doc.discType === "pct" ? " (" + r2(doc.discVal) + "%)" : ""}`, "-" + fm(c.disc)]);
+  if(Number(doc.taxRate)) sumRows.push([`${pdfSafe(doc.taxLabel || "Tax")} (${r2(doc.taxRate)}%)`, fm(c.tax)]);
+  if(c.ship) sumRows.push(["Shipping", fm(c.ship)]);
+  const need = sumRows.length * 5 + 22;
+  if(y + need > H - 20){ pdf.addPage(); y = M + 4; }
+  y += 2; const lx = 120;
+  pdf.setFontSize(9);
+  sumRows.forEach(([k, v]) => { pdf.setFont("helvetica", "normal"); pdf.setTextColor(...muted); pdf.text(k, lx, y); pdf.setTextColor(...ink); pdf.text(v, W - M, y, { align: "right" }); y += 5; });
+  const grand = (k, v, colored) => {
+    pdf.setDrawColor(...ink); pdf.setLineWidth(0.4); pdf.line(lx, y - 2.5, W - M, y - 2.5); y += 2.5;
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(11);
+    if(colored && T !== "minimal") pdf.setTextColor(...acc); else pdf.setTextColor(...ink);
+    pdf.text(k, lx, y); pdf.text(v, W - M, y, { align: "right" }); y += 6; pdf.setFontSize(9);
+  };
+  grand("Total", fm(c.total));
+  if(showBal && c.paid){
+    pdf.setFont("helvetica", "normal"); pdf.setTextColor(...muted); pdf.text("Paid", lx, y); pdf.setTextColor(...ink); pdf.text("-" + fm(c.paid), W - M, y, { align: "right" }); y += 5;
+    grand("Balance due", fm(c.bal), true);
+  }
+
+  // footer blocks
+  y += 6;
+  const blocks = [];
+  if(doc.payment) blocks.push(["Payment details", doc.payment]);
+  if(doc.notes) blocks.push(["Notes", doc.notes]);
+  if(blocks.length){
+    const bw = (W - 2 * M - 10) / 2;
+    const prepared = blocks.map(([k, v]) => [k, pdf.splitTextToSize(pdfSafe(v), bw)]);
+    const bh = Math.max(...prepared.map(p => p[1].length)) * 3.8 + 8;
+    if(y + bh > H - 14){ pdf.addPage(); y = M + 4; }
+    prepared.forEach(([k, L], i) => {
+      const x = M + i * (bw + 10); lab(k, x, y);
+      pdf.setFont("helvetica", "normal"); pdf.setFontSize(8.5); pdf.setTextColor(...muted); pdf.text(L, x, y + 5);
+    });
+  }
+
+  // paid stamp
+  if(status(doc).k === "paid" && doc.type !== "quote"){
+    pdf.setPage(1); pdf.setDrawColor(18, 122, 74); pdf.setTextColor(18, 122, 74); pdf.setLineWidth(0.9);
+    pdf.setFont("helvetica", "bold"); pdf.setFontSize(26);
+    pdf.text("PAID", 160, 108, { angle: 12 });
+  }
+  // page numbers
+  const n = pdf.getNumberOfPages();
+  for(let i = 1; i <= n; i++){
+    pdf.setPage(i); pdf.setFont("helvetica", "normal"); pdf.setFontSize(7.5); pdf.setTextColor(...muted);
+    pdf.text(`${pdfSafe(doc.number)}  ·  Page ${i} of ${n}`.replace("·", "-"), W - M, H - 9, { align: "right" });
+  }
+  return pdf;
+}
+$("btnPdf").addEventListener("click", async () => {
+  if(!window.jspdf){ toast("The PDF engine didn't load. Check your connection and reload."); return; }
+  if(!doc.sample) saveDoc(true);
+  const btn = $("btnPdf"); btn.disabled = true;
+  try{
+    const pdf = buildPdf();
+    const name = `${TITLE[doc.type]} ${doc.number}${doc.to.name ? " - " + doc.to.name : ""}.pdf`.replace(/[\\/:*?"<>|]/g, "");
+    await offer(name, pdf.output("blob"));
+  }catch(e){ toast("Couldn't build the PDF: " + (e.message || e)); }
+  finally{ btn.disabled = false; }
+});
+
+/* init */
+fillForm(); renderPreview(); renderHistory(); renderClients();
+window.__ll = { calc: () => calc(), build: () => buildPdf() };
+})();
+</script>
+
+</body></html>
