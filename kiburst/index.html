@@ -1,0 +1,928 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ki Burst</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A small browser battle game in the style of Dokkan Battle: link ki spheres, fire super attacks, clear stages and summon fighters from banners.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bangers&family=Chakra+Petch:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one phone-shaped game column. Screens swap inside it; battle and summons cover it. Single dark arena look by design. */
+:root{
+  --bg:#0d0a1c; --panel:#191433; --panel2:#231c47; --ink:#f5f1ff; --muted:#a69ec9; --line:#332a5e;
+  --gold:#ffc93c; --hot:#ff5a2a; --good:#3ee08f;
+  --agl:#2f86ff; --teq:#1fc067; --int:#a64dff; --str:#ff3d4d; --phy:#ff9f1c;
+  --f-d:"Bangers", Impact, "Arial Black", system-ui, sans-serif;
+  --f-b:"Chakra Petch", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --gut-l:max(16px, env(safe-area-inset-left, 0px)); --gut-r:max(16px, env(safe-area-inset-right, 0px));
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--f-b);font-size:14px;line-height:1.45;overflow:hidden;-webkit-tap-highlight-color:transparent}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+#app{position:relative;max-width:480px;height:100%;margin:0 auto;display:flex;flex-direction:column;overflow:hidden;
+  background:radial-gradient(ellipse 120% 60% at 50% -10%, #2c1e63 0%, transparent 65%), var(--bg);
+  border-left:1px solid var(--line);border-right:1px solid var(--line)}
+
+/* header */
+.top{display:flex;align-items:center;gap:10px;padding-block:10px;padding-left:var(--gut-l);padding-right:var(--gut-r);border-bottom:1px solid var(--line)}
+.logo{font-family:var(--f-d);font-size:30px;letter-spacing:.04em;line-height:1;margin:0;
+  background:linear-gradient(180deg,#fff6c9 0%,var(--gold) 45%,var(--hot) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 2px 0 #5a1a00)}
+.logo small{display:block;font-family:var(--f-b);font-size:9px;letter-spacing:.24em;color:var(--muted);-webkit-text-fill-color:var(--muted);filter:none;margin-top:2px}
+.spacer{flex:1}
+.stones{display:flex;align-items:center;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:99px;padding:4px 12px 4px 8px;font-weight:700;font-variant-numeric:tabular-nums}
+.gem{width:14px;height:14px;transform:rotate(45deg);border-radius:3px;background:linear-gradient(135deg,#9ff3ff,#3b8bff 55%,#a64dff);box-shadow:0 0 8px #5ab0ff99;flex:none}
+.daily{border:0;border-radius:99px;padding:5px 12px;font-weight:700;font-size:12px;background:var(--gold);color:#2a1600;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{50%{transform:translateY(-2px)}}
+
+/* main area */
+#screen{flex:1;overflow-y:auto;padding-block:16px 24px;padding-left:var(--gut-l);padding-right:var(--gut-r);display:flex;flex-direction:column;gap:14px}
+#screen>*{flex-shrink:0}
+h2.sec{font-family:var(--f-d);font-weight:400;font-size:26px;letter-spacing:.04em;margin:0;line-height:1}
+.sec-sub{color:var(--muted);margin:-6px 0 0}
+
+/* bottom nav */
+.tabs{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:#100c24;padding-bottom:env(safe-area-inset-bottom,0px);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+.tabs button{border:0;background:none;padding:9px 4px 8px;display:flex;flex-direction:column;align-items:center;gap:3px;color:var(--muted);font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+.tabs button svg{width:22px;height:22px}
+.tabs button[aria-current="page"]{color:var(--gold)}
+
+/* type badges */
+.tb{display:inline-grid;place-items:center;font-style:normal;font-size:10px;font-weight:700;letter-spacing:.04em;padding:1px 5px;border-radius:5px;color:#fff;background:var(--tc);line-height:1.4;vertical-align:1px}
+.t-AGL{--tc:var(--agl)} .t-TEQ{--tc:var(--teq)} .t-INT{--tc:var(--int)} .t-STR{--tc:var(--str)} .t-PHY{--tc:var(--phy)}
+
+/* buttons */
+.btn{border:0;border-radius:12px;padding:11px 16px;font-weight:700;letter-spacing:.03em;background:var(--panel2);border:1px solid var(--line);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn.go{background:linear-gradient(180deg,#ffe07a,var(--gold) 50%,#e89a00);color:#2a1600;border-color:#ffe9a0;box-shadow:0 3px 0 #8a5200}
+.btn.hot{background:linear-gradient(180deg,#ff8a5a,var(--hot) 55%,#c02a00);color:#fff;border-color:#ffb08a;box-shadow:0 3px 0 #6e1800}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.btn:not(:disabled):active{transform:translateY(2px);box-shadow:none}
+.cost{display:inline-flex;align-items:center;gap:4px;font-variant-numeric:tabular-nums}
+.cost::before{content:"";width:10px;height:10px;transform:rotate(45deg);border-radius:2px;background:linear-gradient(135deg,#9ff3ff,#3b8bff 55%,#a64dff)}
+
+/* type wheel / how to play */
+.howto{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.howto summary{cursor:pointer;font-weight:700;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.howto summary::after{content:"+";font-size:18px;color:var(--muted)}
+.howto[open] summary::after{content:"–"}
+.howto ul{margin:10px 0 0;padding-left:18px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.howto b{color:var(--ink)}
+.wheel{display:flex;flex-wrap:wrap;align-items:center;gap:4px;margin-top:10px;font-size:12px;color:var(--muted)}
+
+/* stage cards */
+.stage{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.stage.locked{opacity:.6}
+.stage-art{position:relative;height:118px}
+.stage-art>svg{position:absolute;inset:0;width:100%;height:100%}
+.boss-port{position:absolute;right:14px;bottom:-26px;width:84px;height:84px;border-radius:50%;overflow:hidden;border:3px solid var(--panel);box-shadow:0 0 0 2px var(--tc)}
+.boss-port svg{width:100%;height:100%;display:block}
+.stage-tag{position:absolute;left:14px;top:12px;font-family:var(--f-d);font-size:15px;letter-spacing:.08em;background:#0009;padding:2px 9px;border-radius:6px}
+.stage-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px}
+.stage-body h3{font-family:var(--f-d);font-weight:400;font-size:24px;letter-spacing:.03em;margin:0;line-height:1;max-width:calc(100% - 96px)}
+.stage-body p{margin:0;color:var(--muted)}
+.diff{color:var(--gold);letter-spacing:2px}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:600}
+.clear-chip{font-size:11px;font-weight:700;color:var(--good);border:1px solid currentColor;border-radius:99px;padding:0 8px}
+
+/* unit cards */
+.uc{position:relative;display:block;width:100%;aspect-ratio:1;max-width:100%;padding:0;border-radius:12px;border:3px solid var(--rc);background:var(--panel);overflow:hidden}
+.uc svg{display:block;width:100%;height:100%}
+.uc .tb{position:absolute;left:3px;top:3px}
+.uc .rb{position:absolute;left:4px;bottom:1px;font-family:var(--f-d);font-weight:400;font-size:18px;letter-spacing:.04em;color:var(--rc2,var(--rc));-webkit-text-stroke:1px #000;line-height:1.1}
+.uc .lv{position:absolute;right:3px;bottom:3px;font-size:10px;font-weight:700;background:#000b;border-radius:5px;padding:0 4px}
+.uc .lead{position:absolute;right:3px;top:3px;font-size:10px;font-weight:700;background:var(--gold);color:#2a1600;border-radius:5px;padding:0 4px}
+.uc.unknown svg{filter:brightness(.05) saturate(0)}
+.uc.unknown::after{content:"?";position:absolute;inset:0;display:grid;place-items:center;font-family:var(--f-d);font-size:34px;color:var(--muted)}
+.r-R{--rc:#b5794a} .r-SR{--rc:#c9d3e3} .r-SSR{--rc:var(--gold)}
+.r-UR{--rc:#e46bff;--rc2:#ffb3ff;border-color:transparent;background:linear-gradient(var(--panel),var(--panel)) padding-box,linear-gradient(135deg,#ffd76a,#ff6bd5,#7a5cff) border-box}
+.r-LR{--rc:#fff;--rc2:#fff;border-color:transparent;background:linear-gradient(var(--panel),var(--panel)) padding-box,linear-gradient(120deg,#ff3d4d,#ff9f1c,#ffe14a,#1fc067,#2f86ff,#a64dff,#ff3d4d) border-box;background-size:100% 100%,300% 100%;animation:lr 3s linear infinite}
+.r-LR .rb{background:linear-gradient(90deg,#ff7b7b,#ffe14a,#6bffb0,#6bb7ff,#d38bff);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:0;filter:drop-shadow(0 1px 0 #000)}
+@keyframes lr{to{background-position:0 0,300% 0}}
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.uc-name{font-size:11px;color:var(--muted);text-align:center;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* summon banners */
+.banner{border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--panel)}
+.banner-art{position:relative;height:170px;background:radial-gradient(circle at 70% 40%,var(--b1),transparent 60%),linear-gradient(160deg,var(--b2),#0a0618)}
+.banner-art .rays{position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 70% 45%,#ffffff14 0 6deg,transparent 6deg 18deg)}
+.feat-main,.feat-sub{position:absolute;border-radius:14px;overflow:hidden;box-shadow:0 8px 24px #0008}
+.feat-main{right:16px;top:14px;width:132px;height:142px;border:3px solid #fff}
+.feat-sub{right:132px;top:58px;width:92px;height:98px;border:3px solid #ffffffaa}
+.feat-main svg,.feat-sub svg{width:100%;height:100%;display:block}
+.banner-title{position:absolute;left:14px;top:14px;max-width:46%}
+.banner-title .kicker{font-size:10px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;background:var(--hot);padding:1px 7px;border-radius:4px}
+.banner-title h3{font-family:var(--f-d);font-weight:400;font-size:28px;line-height:.95;margin:8px 0 0;letter-spacing:.03em;text-shadow:0 2px 0 #000}
+.banner-body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:10px}
+.banner-body p{margin:0;color:var(--muted)}
+.rates{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.pull-row{display:grid;grid-template-columns:1fr 1.3fr;gap:10px}
+
+/* team */
+.lead-box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px}
+.lead-box .k{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);font-weight:700}
+.slot-empty{aspect-ratio:1;border-radius:12px;border:2px dashed var(--line);background:none;display:grid;place-items:center;color:var(--muted);font-size:26px;width:100%}
+.stats-row{display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.stats-row b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* modal */
+.modal-bg{position:absolute;inset:0;z-index:60;background:#05030ccc;display:grid;place-items:center;padding-block:16px;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.modal{width:100%;max-width:420px;max-height:100%;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:12px;animation:pop .2s ease-out}
+@keyframes pop{from{transform:scale(.94);opacity:0}}
+.modal h3{margin:0;font-family:var(--f-d);font-weight:400;font-size:26px;letter-spacing:.03em;line-height:1}
+.modal .row{display:flex;gap:10px;flex-wrap:wrap}
+.modal .row .btn{flex:1}
+.detail-hd{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center}
+.detail-hd .uc{border-radius:14px}
+.kv{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;text-align:center}
+.kv div{background:var(--panel2);border-radius:10px;padding:6px 4px}
+.kv small{display:block;font-size:10px;letter-spacing:.14em;color:var(--muted)}
+.kv b{font-variant-numeric:tabular-nums}
+.skill{border-left:3px solid var(--tc,var(--gold));padding:2px 0 2px 10px}
+.skill .k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.skill .n{font-weight:700}
+.skill p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.title-sm{color:var(--muted);font-size:12px}
+.cats{display:flex;gap:6px;flex-wrap:wrap}
+.cats span{font-size:11px;border:1px solid var(--line);border-radius:99px;padding:0 8px;color:var(--muted)}
+
+/* toast */
+.toast{position:absolute;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:90;background:#000d;border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-weight:600;max-width:calc(100% - 32px);text-align:center;animation:pop .2s}
+
+/* ===== battle ===== */
+.battle{position:absolute;inset:0;z-index:30;display:flex;flex-direction:column;background:var(--bg);overflow-y:auto;overflow-x:hidden}
+.b-top{display:flex;align-items:center;gap:10px;padding-block:8px;padding-left:var(--gut-l);padding-right:var(--gut-r);font-size:12px;color:var(--muted);background:#0a0716;border-bottom:1px solid var(--line)}
+.b-top b{color:var(--ink);font-family:var(--f-d);font-weight:400;font-size:18px;letter-spacing:.04em}
+.b-top .retreat{border:1px solid var(--line);background:none;border-radius:8px;padding:3px 10px;font-size:12px;color:var(--muted)}
+.b-enemy{position:relative;flex:1 0 auto;min-height:190px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding-block:12px;padding-left:var(--gut-l);padding-right:var(--gut-r);overflow:hidden}
+.b-enemy>svg.bg{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.b-enemy>*:not(.bg){position:relative;z-index:1}
+.e-port{width:min(124px,16vh);height:min(124px,16vh);border-radius:50%;overflow:hidden;border:3px solid var(--tc);box-shadow:0 0 0 4px #0006,0 0 30px var(--tc)}
+.e-port svg{display:block;width:100%;height:100%}
+.e-port.hit{animation:shake .35s}
+.e-port.down{animation:down .6s forwards}
+.e-port.lunge{animation:lunge .3s}
+@keyframes shake{20%{transform:translateX(-7px) rotate(-3deg);filter:brightness(2.2)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
+@keyframes down{to{transform:scale(.4) rotate(25deg);opacity:0;filter:brightness(3)}}
+@keyframes lunge{50%{transform:translateY(16px) scale(1.12)}}
+.e-info{width:min(100%,320px);display:flex;flex-direction:column;gap:4px;background:#0009;border-radius:10px;padding:6px 10px}
+.e-name{display:flex;align-items:center;gap:6px;font-weight:700}
+.e-name .boss{font-size:10px;font-weight:700;letter-spacing:.14em;background:var(--hot);border-radius:4px;padding:0 6px}
+.e-status{display:flex;gap:6px;font-size:11px;min-height:16px}
+.e-status span{background:#ffffff1a;border-radius:4px;padding:0 6px}
+.bar{position:relative;height:10px;border-radius:99px;background:#000a;border:1px solid #ffffff22;overflow:hidden}
+.bar>i{position:absolute;inset:0 auto 0 0;width:100%;border-radius:99px;transition:width .4s ease-out}
+.bar.ehp>i{background:linear-gradient(90deg,#ff3d4d,#ff8a3d)}
+.bar.thp>i{background:linear-gradient(90deg,#1fc067,#9cff5a)}
+.bar.thp.low>i{background:linear-gradient(90deg,#ff3d4d,#ffb23d)}
+.bar.gauge>i{background:linear-gradient(90deg,#2f86ff,#a64dff,#ff5ad5)}
+.bar-lab{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.b-team{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center;padding-block:10px 6px;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.b-team .burst{grid-row:span 2;font-family:var(--f-d);font-weight:400;font-size:20px;letter-spacing:.06em;border:0;border-radius:12px;padding:8px 14px;background:#2a2350;color:var(--muted)}
+.b-team .burst.ready{background:conic-gradient(from 0deg,#ff3d4d,#ff9f1c,#ffe14a,#1fc067,#2f86ff,#a64dff,#ff3d4d);color:#fff;text-shadow:0 2px 0 #000;animation:pulse 1s infinite}
+.b-team .burst.on{background:var(--gold);color:#2a1600}
+@keyframes pulse{50%{transform:scale(1.07)}}
+.rot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding-block:4px 10px;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.slot{position:relative;background:var(--panel);border:2px solid var(--line);border-radius:12px;padding:6px;display:flex;flex-direction:column;gap:5px;transition:transform .15s,opacity .2s}
+.slot.active{border-color:var(--gold);box-shadow:0 0 0 2px #ffc93c44,0 0 18px #ffc93c55;transform:translateY(-3px)}
+.slot.done{opacity:.5}
+.slot.hit{animation:shake .35s}
+.slot-hd{display:flex;gap:6px;align-items:center;min-width:0}
+.slot-pt{width:40px;height:40px;flex:none;border-radius:8px;overflow:hidden;border:2px solid var(--rc)}
+.slot-pt svg{display:block;width:100%;height:100%}
+.slot-nm{min-width:0;font-size:11px;line-height:1.2}
+.slot-nm b{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ki{display:grid;grid-template-columns:repeat(12,1fr);gap:1px;height:7px}
+.ki i{background:#ffffff1c;border-radius:1px}
+.ki i.k1{background:var(--gold)}
+.ki i.k2{background:linear-gradient(90deg,#ff5ad5,#6bd4ff)}
+.ki-row{display:flex;justify-content:space-between;font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ki-row .sa{font-weight:700;color:var(--gold);letter-spacing:.06em}
+.ki-row .sa.ultra{color:#ff8ae6}
+.warn{position:absolute;top:-9px;right:-6px;display:flex;gap:3px}
+.warn span{font-size:10px;font-weight:700;background:var(--str);color:#fff;border-radius:6px;padding:1px 6px;box-shadow:0 2px 0 #6a0010}
+.warn span.sup{background:#000;color:var(--gold);border:1px solid var(--gold)}
+.preview{position:absolute;left:50%;top:-12px;transform:translateX(-50%);font-family:var(--f-d);font-size:16px;color:#fff;-webkit-text-stroke:1px #000;pointer-events:none}
+.board-wrap{padding-block:4px 8px;padding-left:var(--gut-l);padding-right:var(--gut-r)}
+.board{--cell:min(56px,7.4vh);display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:min(100%,calc(var(--cell)*6 + 30px));margin:0 auto;background:#0007;border:1px solid var(--line);border-radius:14px;padding:8px}
+.sp{aspect-ratio:1;max-width:100%;border-radius:50%;border:0;padding:0;position:relative;
+  background:radial-gradient(circle at 34% 28%,#ffffffee 0 9%,transparent 11%),radial-gradient(circle at 50% 55%,var(--c) 0 42%,color-mix(in srgb,var(--c) 40%,#000) 78%);
+  box-shadow:inset 0 -3px 6px #0006,0 0 8px color-mix(in srgb,var(--c) 50%,transparent);transition:transform .12s}
+.sp::after{content:attr(data-l);position:absolute;inset:0;display:grid;place-items:center;font-size:10px;font-weight:700;color:#ffffffa0}
+.s-AGL{--c:var(--agl)} .s-TEQ{--c:var(--teq)} .s-INT{--c:var(--int)} .s-STR{--c:var(--str)} .s-PHY{--c:var(--phy)}
+.s-RBW{--c:#ffffff;background:radial-gradient(circle at 34% 28%,#ffffffee 0 9%,transparent 11%),conic-gradient(#ff3d4d,#ff9f1c,#ffe14a,#1fc067,#2f86ff,#a64dff,#ff3d4d)}
+.sp.hl{transform:scale(1.12);box-shadow:0 0 0 2px #fff,0 0 14px var(--c)}
+.sp.take{animation:take .26s forwards}
+.sp.new{animation:drop .3s ease-out}
+@keyframes take{to{transform:scale(.1) translateY(-30px);opacity:0}}
+@keyframes drop{from{transform:translateY(-40px);opacity:0}}
+.b-log{min-height:34px;padding-block:2px 10px;padding-left:var(--gut-l);padding-right:var(--gut-r);font-size:12px;color:var(--muted);text-align:center}
+.battle.bursting .board{box-shadow:0 0 0 2px var(--gold),0 0 30px #ffc93c66}
+.battle.bursting .b-enemy::after{content:"";position:absolute;inset:0;background:repeating-conic-gradient(from 0deg at 50% 50%,#ffe14a22 0 5deg,transparent 5deg 15deg);animation:spin 6s linear infinite;z-index:0}
+@keyframes spin{to{transform:rotate(1turn)}}
+.pop-n{position:absolute;z-index:5;font-family:var(--f-d);font-size:36px;letter-spacing:.02em;color:#fff;-webkit-text-stroke:1.5px #1a0a00;text-shadow:0 3px 0 #000;pointer-events:none;animation:float 1.1s ease-out forwards;white-space:nowrap}
+.pop-n.crit{color:#ffe14a;font-size:44px}
+.pop-n.big{font-size:48px;color:#ffd0f5}
+.pop-n.small{font-size:20px}
+.pop-n.bad{color:#ff6b6b;font-size:24px}
+.pop-n.info{color:#9fe8ff;font-size:22px}
+@keyframes float{0%{transform:translate(-50%,10px) scale(.6);opacity:0}15%{transform:translate(-50%,0) scale(1.1);opacity:1}70%{opacity:1}100%{transform:translate(-50%,-34px) scale(1);opacity:0}}
+.flash{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;overflow:hidden;pointer-events:none;
+  background:radial-gradient(circle,color-mix(in srgb,var(--tc) 65%,#000) 0%,#05030c 70%);animation:flashIn 1.1s forwards}
+.flash::before{content:"";position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg,#ffffff1c 0 4deg,transparent 4deg 12deg);animation:spin 2s linear infinite}
+.flash.ultra{background:radial-gradient(circle,#ff7ad9 0%,#3a0a5e 45%,#05030c 75%)}
+.fl-art{position:relative;width:180px;height:180px;border-radius:24px;overflow:hidden;border:4px solid #fff;animation:slide 1.1s ease-out}
+.fl-art svg{display:block;width:100%;height:100%}
+.fl-txt{position:relative;text-align:center;padding-inline:16px}
+.fl-txt small{display:block;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#fff}
+.fl-txt b{font-family:var(--f-d);font-weight:400;font-size:44px;line-height:1;letter-spacing:.03em;color:#fff;-webkit-text-stroke:1.5px #000;text-shadow:0 4px 0 #000}
+@keyframes flashIn{0%{opacity:0}10%{opacity:1}85%{opacity:1}100%{opacity:0}}
+@keyframes slide{from{transform:translateX(-120%) skewX(-10deg)}35%{transform:translateX(0)}}
+.wave-ban{position:absolute;inset:0;z-index:6;display:grid;place-items:center;font-family:var(--f-d);font-size:56px;letter-spacing:.06em;color:#fff;-webkit-text-stroke:2px #000;text-shadow:0 4px 0 #000;pointer-events:none;animation:flashIn 1s forwards}
+.wave-ban.boss{color:var(--hot)}
+
+/* summon overlay */
+.summon{position:absolute;inset:0;z-index:70;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding-block:20px;padding-left:var(--gut-l);padding-right:var(--gut-r);background:radial-gradient(circle at 50% 40%,#2a1a66,#05030c 70%);overflow-y:auto}
+.orb{width:150px;height:150px;border-radius:50%;border:0;background:radial-gradient(circle at 35% 30%,#fff 0 8%,var(--oc) 30%,#000 90%);box-shadow:0 0 50px var(--oc),0 0 120px var(--oc);animation:orb 1.2s ease-in-out infinite}
+.orb.LR,.orb.UR{background:radial-gradient(circle at 35% 30%,#fff 0 8%,transparent 30%),conic-gradient(#ff3d4d,#ff9f1c,#ffe14a,#1fc067,#2f86ff,#a64dff,#ff3d4d);animation:orb 1.2s ease-in-out infinite,spin 3s linear infinite}
+@keyframes orb{50%{transform:scale(1.08)}}
+.summon .hint{color:var(--muted);font-weight:600;letter-spacing:.1em;text-transform:uppercase;font-size:12px}
+.res-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;width:100%;max-width:440px}
+.res-grid.one{grid-template-columns:minmax(0,160px);justify-content:center}
+.res{display:flex;flex-direction:column;gap:3px;animation:reveal .35s both}
+.res .tag{font-size:10px;font-weight:700;text-align:center;color:var(--good)}
+.res .tag.dup{color:var(--muted)}
+@keyframes reveal{from{transform:rotateY(90deg) scale(.8);opacity:0}}
+.summon h3{margin:0;font-family:var(--f-d);font-weight:400;font-size:34px;letter-spacing:.05em}
+
+@media (max-width:400px){ .banner-art{height:150px} .feat-main{width:110px;height:120px} .feat-sub{right:112px;width:78px;height:84px;top:52px} .fl-txt b{font-size:36px} }
+@media (prefers-reduced-motion: reduce){ *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important} .flash,.wave-ban{animation:none} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <h1 class="logo">KI BURST<small>FIGHTER ARENA</small></h1>
+    <div class="spacer"></div>
+    <button class="daily" id="daily" data-act="daily" hidden>Daily +20</button>
+    <div class="stones" title="Ki Stones"><span class="gem"></span><span id="stones">0</span></div>
+  </header>
+  <main id="screen"></main>
+  <nav class="tabs" aria-label="Main">
+    <button data-act="tab" data-arg="quest"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2"/></svg>Quests</button>
+    <button data-act="tab" data-arg="summon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8"/><path d="M12 8l1.2 2.6 2.8.3-2.1 1.9.6 2.8-2.5-1.5-2.5 1.5.6-2.8L8 10.9l2.8-.3z"/></svg>Summon</button>
+    <button data-act="tab" data-arg="team"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.6c2.7.1 4.6 1.8 5.3 4.6"/></svg>Team</button>
+    <button data-act="tab" data-arg="box"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>Box</button>
+  </nav>
+</div>
+<script>
+'use strict';
+/* ================= data ================= */
+const TYPES = ['AGL','TEQ','INT','STR','PHY'];
+const TCOL  = {AGL:'#2f86ff',TEQ:'#1fc067',INT:'#a64dff',STR:'#ff3d4d',PHY:'#ff9f1c'};
+const TDARK = {AGL:'#0d3b8a',TEQ:'#0a5a2e',INT:'#4a1585',STR:'#8a0f1c',PHY:'#8a4d00'};
+const BEATS = {AGL:'STR',STR:'PHY',PHY:'INT',INT:'TEQ',TEQ:'AGL'}; // key has the advantage over value
+const RANK  = {R:0,SR:1,SSR:2,UR:3,LR:4};
+
+const UNITS = {
+  jun:   {name:'Jun',  title:'Rookie Brawler', type:'PHY', rar:'R', hp:3500, atk:3000, def:2000, cats:['Rivals'],
+          lead:{to:{type:'PHY'},pct:20,ki:0}, pas:{name:'Hard Knocks',def:15},
+          sa:{name:'Rush Punch',mult:2.0},
+          look:{hair:'short',hc:'#3b2416',skin:'#e7b98f',outfit:'#5b6b7a',inner:'#e7b98f',band:'#d23b2b'}},
+  pell:  {name:'Pell', title:'Wind Scout', type:'AGL', rar:'R', hp:3200, atk:3200, def:1600, cats:['Dawn Squad'],
+          lead:{to:{type:'AGL'},pct:20,ki:0}, pas:{name:'Light Feet',dodge:10},
+          sa:{name:'Gale Kick',mult:2.0},
+          look:{hair:'short',hc:'#3a6bd8',skin:'#f1c9a3',outfit:'#2a3d6e',inner:'#9fd0ff'}},
+  mira:  {name:'Mira', title:'Temple Disciple', type:'TEQ', rar:'R', hp:3400, atk:3000, def:1800, cats:['Dawn Squad'],
+          lead:{to:{type:'TEQ'},pct:20,ki:0}, pas:{name:'Calm Mind',ki:1},
+          sa:{name:'Palm Wave',mult:2.0,eff:{heal:4}},
+          look:{hair:'long',hc:'#2b1d14',skin:'#f3d0b0',outfit:'#c8a24a',inner:'#7a2b1a'}},
+  grak:  {name:'Grak', title:'Bandit Chief', type:'STR', rar:'SR', hp:5000, atk:4600, def:2500, cats:['Rivals'],
+          lead:{to:{cat:'Rivals'},pct:35,ki:1}, pas:{name:'Plunder',atk:15},
+          sa:{name:'Skull Crusher',mult:2.3},
+          look:{hair:'mohawk',hc:'#e0422a',skin:'#b98a5e',outfit:'#5e3b22',inner:'#b98a5e'}},
+  ilo:   {name:'Ilo',  title:'Sky Sentinel', type:'INT', rar:'SR', hp:5200, atk:4300, def:2900, cats:['Dawn Squad'],
+          lead:{to:{type:'INT'},pct:35,ki:1}, pas:{name:'Watchtower',def:20},
+          sa:{name:'Halo Beam',mult:2.3,eff:{defUp:30}},
+          look:{hair:'short',hc:'#e9eef7',skin:'#d9a57c',outfit:'#3f8fd1',inner:'#e9eef7',band:'#ffd04a'}},
+  kael_y:{name:'Kael', title:'Young Fighter', type:'STR', rar:'SSR', hp:7000, atk:6500, def:3500, cats:['Dawn Squad'],
+          lead:{to:{cat:'Dawn Squad'},pct:60,ki:1}, pas:{name:'Never Back Down',atk:20,ki:1},
+          sa:{name:'Blazing Strike',mult:2.5,eff:{atkUp:20}},
+          look:{hair:'spiky',hc:'#17141f',skin:'#f2c49c',outfit:'#ff7a1a',inner:'#1f4fbf'}},
+  torun: {name:'Torun',title:'Ironwall', type:'PHY', rar:'SSR', hp:9000, atk:6000, def:5500, cats:['Rivals'],
+          lead:{to:{type:'PHY'},pct:60,ki:1}, pas:{name:'Living Fortress',def:40},
+          sa:{name:'Mountain Breaker',mult:2.5,eff:{defUp:60}},
+          look:{hair:'bald',skin:'#a9704a',outfit:'#6b4a2e',inner:'#a9704a',big:1,band:'#ff9f1c'}},
+  seren: {name:'Seren',title:'Storm Sage', type:'INT', rar:'SSR', hp:7500, atk:6800, def:3600, cats:['Dawn Squad'],
+          lead:{to:{type:'INT'},pct:60,ki:1}, pas:{name:'Starlit Insight',atk:15,ki:2},
+          sa:{name:'Astral Lance',mult:2.8,eff:{defDown:20}},
+          look:{hair:'long',hc:'#ece8ff',skin:'#f0cfb4',outfit:'#5a2a9a',inner:'#ece8ff',eye:'#6a3ad0'}},
+  vexa:  {name:'Vexa', title:'Crimson Princess', type:'AGL', rar:'UR', hp:10000, atk:9500, def:5000, cats:['Rivals'],
+          lead:{to:{cat:'Rivals'},pct:90,ki:2}, pas:{name:'Royal Pride',atk:30,dodge:25,ki:1},
+          sa:{name:'Crimson Barrage',mult:3.0,eff:{atkUp:30}},
+          look:{hair:'long',hc:'#c8143c',skin:'#f6d6c2',outfit:'#1d1726',inner:'#c8143c',eye:'#c8143c',crown:1}},
+  rhyx:  {name:'Rhyx', title:'Blade of Dawn', type:'TEQ', rar:'UR', hp:9500, atk:10000, def:4800, cats:['Dawn Squad'],
+          lead:{to:{all:1},pct:50,ki:1}, pas:{name:'Dawn Edge',atk:20,crit:30,ki:2},
+          sa:{name:'Thousand Cuts',mult:3.0,eff:{stun:35}},
+          look:{hair:'spiky',hc:'#dfe5ee',skin:'#e9c4a0',outfit:'#136b5a',inner:'#0b3d33',band:'#1fc067',sword:1}},
+  kael_lr:{name:'Kael',title:'Ascended Flame', type:'STR', rar:'LR', hp:14000, atk:13000, def:7000, cats:['Dawn Squad'],
+          lead:{to:{cat:'Dawn Squad'},pct:120,ki:3}, pas:{name:'Ascended Flame',atk:50,def:40,ki:2,healSA:5},
+          sa:{name:'Solar Breaker',mult:3.5,eff:{atkUp:30}},
+          ultra:{name:'Ascension Nova',mult:5.0,eff:{atkUp:50}},
+          look:{hair:'spiky',hc:'#ffd23a',skin:'#f2c49c',outfit:'#ff7a1a',inner:'#1f4fbf',aura:'#ffe14a',eye:'#1aa39a'}},
+  nox_lr:{name:'Nox',  title:'Void Tyrant', type:'INT', rar:'LR', hp:15000, atk:12500, def:7500, cats:['Rivals'],
+          lead:{to:{all:1},pct:100,ki:2}, pas:{name:'Void Crown',atk:60,dodge:15,ki:3},
+          sa:{name:'Abyss Ray',mult:3.5,eff:{defDown:25}},
+          ultra:{name:'Eclipse End',mult:5.0,eff:{defDown:30,stun:40}},
+          look:{hair:'hood',hc:'#1b1030',skin:'#b9a7d8',outfit:'#2a1747',inner:'#a64dff',eye:'#f0d8ff',horns:1,aura:'#c48bff'}},
+};
+
+const STAGES = [
+  {id:'s1', name:'Dustwind Canyon', blurb:'Bandits have seized the trade road. Clear them out.', sky:['#ffb36b','#c4532a','#3a1410'], land:'#5a2412', stars:1, first:30, replay:5,
+   waves:[
+    {name:'Road Bandit', type:'PHY', hp:30000, atk:3500, def:600, hits:1, look:{hair:'short',hc:'#5b3a1e',skin:'#d9a57c',outfit:'#7b5a3a',mask:'#3b2a1a'}},
+    {name:'Canyon Brute', type:'STR', hp:45000, atk:4000, def:900, hits:1, look:{hair:'bald',skin:'#8fae6a',outfit:'#4a3a2a',big:1}},
+    {name:'Grak, Bandit King', type:'INT', hp:95000, atk:4600, def:1400, hits:2, boss:1, sup:'Bandit Crash', look:{hair:'mohawk',hc:'#e0422a',skin:'#b98a5e',outfit:'#3a2416',crown:1}},
+   ]},
+  {id:'s2', name:'Crimson Fortress', blurb:'General Krell commands the iron legion from the citadel.', sky:['#ff6b6b','#5a1030','#14060f'], land:'#2b0d18', stars:2, first:40, replay:8,
+   waves:[
+    {name:'Fortress Guard', type:'TEQ', hp:90000, atk:6200, def:2500, hits:1, look:{hair:'robot',metal:'#7a8796',eye:'#ff3d4d',outfit:'#3a4552'}},
+    {name:'Iron Sentry', type:'AGL', hp:120000, atk:7000, def:3000, hits:2, look:{hair:'robot',metal:'#4d6fa8',eye:'#7fe8ff',outfit:'#22344f'}},
+    {name:'General Krell', type:'STR', hp:230000, atk:7200, def:4000, hits:2, boss:1, sup:'Iron Decree', look:{hair:'mohawk',hc:'#ff3d4d',skin:'#9aa0aa',outfit:'#3b3f4a',inner:'#ff3d4d',band:'#c9d3e3',eye:'#ff3d4d'}},
+   ]},
+  {id:'s3', name:'Rift of Nox', blurb:'The sky has torn open. The Void Tyrant is waiting on the other side.', sky:['#8a5cff','#2a0f5e','#05020f'], land:'#120826', stars:3, first:60, replay:12,
+   waves:[
+    {name:'Void Spawn', type:'PHY', hp:180000, atk:11000, def:4500, hits:2, look:{hair:'hood',hc:'#2a1747',skin:'#6a4a9a',outfit:'#1b1030',eye:'#ff8ae6',horns:1}},
+    {name:'Void Knight', type:'TEQ', hp:250000, atk:12500, def:5500, hits:2, look:{hair:'robot',metal:'#2e2448',eye:'#c48bff',outfit:'#1b1030'}},
+    {name:'Nox, Void Tyrant', type:'INT', hp:800000, atk:14000, def:7000, hits:3, boss:1, sup:'Eclipse End', look:UNITS.nox_lr.look},
+   ]},
+];
+
+const BANNERS = [
+  {id:'b1', name:'Ascension Festival', feat:['kael_lr','vexa'], b1:'#ffb23d', b2:'#7a1a10',
+   blurb:'Kael breaks his limits. LR Kael, Ascended Flame and UR Vexa have boosted rates.'},
+  {id:'b2', name:"Tyrant's Shadow", feat:['nox_lr','rhyx'], b1:'#a64dff', b2:'#1a0a3a',
+   blurb:'Darkness pours from the rift. LR Nox, Void Tyrant and UR Rhyx have boosted rates.'},
+];
+const RATES = [['LR',1.5],['UR',6],['SSR',15],['SR',30],['R',47.5]];
+
+/* ================= helpers ================= */
+const $ = s => document.querySelector(s);
+const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const wait = ms => new Promise(r => setTimeout(r, RM ? ms * 0.35 : ms));
+const rnd = n => Math.floor(Math.random() * n);
+const pick = a => a[rnd(a.length)];
+const fmt = n => Math.round(n).toLocaleString('en-US');
+const today = () => new Date().toISOString().slice(0, 10);
+const maxKiOf = u => u.rar === 'LR' ? 24 : 12;
+
+function typeMult(att, def){ return BEATS[att] === def ? 1.5 : BEATS[def] === att ? 0.75 : 1; }
+function saWord(m){ return m >= 5 ? 'mega-colossal' : m >= 3.5 ? 'immense' : m >= 3 ? 'supreme' : m >= 2.4 ? 'extreme' : 'huge'; }
+function leadTarget(to){ return to.all ? 'All Types' : to.type ? `${to.type} Type` : `"${to.cat}" Category`; }
+function leadText(l){ return `${leadTarget(l.to)}${l.ki ? ` Ki +${l.ki} and` : ''} HP, ATK & DEF +${l.pct}%`; }
+function leadFor(l, u){ const hit = l.to.all || l.to.type === u.type || (l.to.cat && u.cats.includes(l.to.cat)); return hit ? l : {pct:0, ki:0}; }
+function passiveText(p){
+  const out = [];
+  if (p.atk || p.def) out.push(p.atk && p.def ? `ATK +${p.atk}% and DEF +${p.def}%` : p.atk ? `ATK +${p.atk}%` : `DEF +${p.def}%`);
+  if (p.ki) out.push(`Ki +${p.ki} at the start of each turn`);
+  if (p.crit) out.push(`${p.crit}% chance of a critical hit`);
+  if (p.dodge) out.push(`${p.dodge}% chance to evade enemy attacks`);
+  if (p.healSA) out.push(`recovers ${p.healSA}% HP when performing a Super Attack`);
+  const s = out.join('; ');
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+function saText(sa){
+  const e = sa.eff || {}, out = [`Causes ${saWord(sa.mult)} damage to enemy`];
+  if (e.atkUp) out.push(`raises ATK by ${e.atkUp}% (stacks)`);
+  if (e.defUp) out.push(`raises DEF by ${e.defUp}% for 1 turn`);
+  if (e.defDown) out.push(`lowers enemy DEF by ${e.defDown}%`);
+  if (e.stun) out.push(`${e.stun}% chance to stun the enemy`);
+  if (e.heal) out.push(`recovers ${e.heal}% HP`);
+  return out.join('; ');
+}
+
+/* procedural portraits */
+let gid = 0;
+const RAYS = Array.from({length:12}, (_, i) => {
+  const a = i / 12 * Math.PI * 2, b = a + 0.12, R = 90;
+  return `M50,46 L${(50 + Math.cos(a) * R).toFixed(1)},${(46 + Math.sin(a) * R).toFixed(1)} L${(50 + Math.cos(b) * R).toFixed(1)},${(46 + Math.sin(b) * R).toFixed(1)}Z`;
+}).join('');
+function portrait(L, type){
+  const id = 'pg' + (gid++), sk = L.skin || '#f0c7a0', ec = L.eye || '#16121f';
+  let s = `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><radialGradient id="${id}" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="${L.aura || TCOL[type]}"/><stop offset=".55" stop-color="${TDARK[type]}"/><stop offset="1" stop-color="#07040f"/></radialGradient></defs><rect width="100" height="100" fill="url(#${id})"/><path d="${RAYS}" fill="#fff" opacity=".13"/>`;
+  if (L.sword) s += `<path d="M76,100 L85,30 L89,31 L82,100Z" fill="#e3eaf4"/><rect x="77" y="68" width="14" height="4" fill="#5b3a1e" transform="rotate(8 84 70)"/>`;
+  if (L.hair === 'hood') s += `<path d="M18,100 L24,50 Q26,16 50,14 Q74,16 76,50 L82,100Z" fill="${L.hc}"/>`;
+  if (L.hair === 'long') s += `<path d="M32,46 Q30,26 50,26 Q70,26 68,46 L74,86 L62,78 L64,54 L36,54 L38,78 L26,86Z" fill="${L.hc}"/>`;
+  const sh = L.big ? 8 : 16;
+  s += `<path d="M${sh - 2},100 Q${sh},72 50,69 Q${100 - sh},72 ${102 - sh},100Z" fill="${L.outfit}"/>`;
+  if (L.hair === 'robot'){
+    s += `<rect x="44" y="58" width="12" height="13" fill="#2a2a33"/><rect x="31" y="30" width="38" height="34" rx="9" fill="${L.metal}"/><rect x="31" y="30" width="38" height="8" rx="4" fill="#ffffff22"/><rect x="35" y="44" width="30" height="8" rx="4" fill="${ec}"/><rect x="48" y="19" width="4" height="12" fill="${L.metal}"/><circle cx="50" cy="18" r="3" fill="${ec}"/><path d="M40,58 L60,58" stroke="#0006" stroke-width="2"/>`;
+    return s + '</svg>';
+  }
+  s += `<path d="M41,71 L50,86 L59,71Z" fill="${L.inner || sk}"/><rect x="44" y="57" width="12" height="14" fill="${sk}"/><ellipse cx="50" cy="49" rx="15" ry="17" fill="${sk}"/>`;
+  s += `<path d="M38,44 L47,47.5 M62,44 L53,47.5" stroke="#1a1220" stroke-width="2.6" stroke-linecap="round"/>`;
+  s += `<path d="M40,51 L46.5,52.5 M60,51 L53.5,52.5" stroke="${ec}" stroke-width="2.8" stroke-linecap="round"/>`;
+  s += `<path d="M46,60 L54,59.5" stroke="#5a2a20" stroke-width="1.6" stroke-linecap="round"/>`;
+  if (L.mask) s += `<path d="M35,53 Q50,60 65,53 L64,62 Q50,70 36,62Z" fill="${L.mask}"/>`;
+  const H = {
+    spiky:`<path d="M34,50 L24,42 L33,40 L25,26 L39,32 L38,14 L49,27 L57,10 L60,29 L73,18 L68,33 L80,36 L68,43 L66,50 Q64,37 50,36 Q36,37 34,50Z"/><path d="M44,36 L47,46 L51,36Z M53,36 L57,44 L58,36Z"/>`,
+    short:`<path d="M34,48 Q31,29 50,29 Q69,29 66,48 L63,40 L57,42 L51,37 L45,42 L38,40Z"/>`,
+    long:`<path d="M34,50 Q31,29 50,29 Q69,29 66,50 Q62,38 52,37 L48,44 L46,37 Q38,39 34,50Z"/>`,
+    mohawk:`<path d="M45,35 L43,14 L49,22 L51,9 L55,21 L58,14 L57,35 Q51,32 45,35Z"/>`,
+    hood:`<path d="M30,64 Q27,28 50,26 Q73,28 70,64 L66,64 Q67,38 50,36 Q33,38 34,64Z"/>`,
+    bald:'',
+  }[L.hair] || '';
+  if (H) s += `<g fill="${L.hc}">${H}</g>`;
+  if (L.hair === 'bald') s += `<ellipse cx="43" cy="37" rx="5" ry="2.6" fill="#fff" opacity=".25"/>`;
+  if (L.band) s += `<path d="M35,41 Q50,36 65,41 L65,45 Q50,40 35,45Z" fill="${L.band}"/>`;
+  if (L.horns) s += `<path d="M37,32 L25,12 L42,28Z M63,32 L75,12 L58,28Z" fill="#efe6d2"/>`;
+  if (L.crown) s += `<path d="M38,30 L40,19 L45,25 L50,16 L55,25 L60,19 L62,30Z" fill="#ffc93c" stroke="#7a4a00" stroke-width=".8"/>`;
+  return s + '</svg>';
+}
+function landscape(st){
+  const id = 'ls' + (gid++);
+  return `<svg class="bg" viewBox="0 0 320 140" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${st.sky[2]}"/><stop offset=".62" stop-color="${st.sky[1]}"/><stop offset="1" stop-color="${st.sky[0]}"/></linearGradient></defs><rect width="320" height="140" fill="url(#${id})"/><circle cx="246" cy="44" r="20" fill="${st.sky[0]}" opacity=".85"/><path d="M0,100 L40,68 L70,88 L110,50 L150,94 L190,60 L230,90 L270,56 L320,86 L320,140 L0,140Z" fill="${st.land}" opacity=".7"/><path d="M0,118 L60,98 L120,112 L180,94 L240,110 L320,96 L320,140 L0,140Z" fill="${st.land}"/></svg>`;
+}
+
+/* ================= save ================= */
+const SAVE_KEY = 'kiburst-save-v1';
+function freshSave(){
+  return {stones:150, owned:{kael_y:{lv:1,n:1}, mira:{lv:1,n:1}, pell:{lv:1,n:1}, jun:{lv:1,n:1}},
+          team:['kael_y','mira','pell','jun'], cleared:{}, daily:'', pulls:0};
+}
+function loadSave(){
+  try { const o = JSON.parse(localStorage.getItem(SAVE_KEY)); if (o && o.owned) return Object.assign(freshSave(), o); } catch (e) {}
+  return freshSave();
+}
+function save(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(S)); } catch (e) {} }
+let S = loadSave();
+
+/* ================= shell ================= */
+let tab = 'quest', pickSlot = -1;
+function toast(msg){
+  document.querySelectorAll('.toast').forEach(t => t.remove());
+  const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; $('#app').append(t);
+  setTimeout(() => t.remove(), 2400);
+}
+function modal(html){ closeModal(); const m = document.createElement('div'); m.className = 'modal-bg'; m.innerHTML = `<div class="modal" role="dialog" aria-modal="true">${html}</div>`; $('#app').append(m); return m; }
+function closeModal(){ document.querySelectorAll('.modal-bg').forEach(m => m.remove()); }
+
+function unitCard(id, {act = 'detail', arg = id, lead = false, showLv = true} = {}){
+  const u = UNITS[id], o = S.owned[id];
+  return `<button class="uc r-${u.rar}" data-act="${act}" data-arg="${arg}" aria-label="${u.rar} ${u.name}, ${u.title}">${portrait(u.look, u.type)}<i class="tb t-${u.type}">${u.type}</i><b class="rb">${u.rar}</b>${lead ? '<span class="lead">LEADER</span>' : ''}${showLv && o ? `<span class="lv">SA ${o.lv}</span>` : ''}</button>`;
+}
+
+function render(){
+  $('#stones').textContent = fmt(S.stones);
+  $('#daily').hidden = S.daily === today();
+  document.querySelectorAll('.tabs button').forEach(b => b.dataset.arg === tab ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
+  $('#screen').innerHTML = {quest:viewQuest, summon:viewSummon, team:viewTeam, box:viewBox}[tab]();
+  $('#screen').scrollTop = 0;
+}
+
+function viewQuest(){
+  const wheel = TYPES.map(t => `<i class="tb t-${t}">${t}</i>`);
+  const order = ['AGL','STR','PHY','INT','TEQ','AGL'].map(t => `<i class="tb t-${t}">${t}</i>`).join(' › ');
+  return `<h2 class="sec">Quests</h2><p class="sec-sub">Clear a stage to unlock the next one. First clears pay the most Ki Stones.</p>
+  <details class="howto"><summary>How to battle</summary>
+    <ul>
+      <li><b>Tap a ki sphere</b> to collect it and every touching sphere of the same color. The highlighted fighter takes the ki and attacks.</li>
+      <li>Spheres that match the fighter's type give <b>2 ki</b>; others give 1. Rainbow spheres join any chain.</li>
+      <li><b>12 ki</b> fires a Super Attack. LR fighters hold up to 24 ki and fire an <b>Ultra Super</b> at 18.</li>
+      <li>Red <b>!</b> tags show which fighter the enemy will hit this turn. Fill the gauge, then hit <b>BURST</b> for +12 ki and +50% ATK.</li>
+      <li>Your leader's skill boosts matching fighters. Three fighters rotate in each turn.</li>
+    </ul>
+    <div class="wheel">Type advantage: ${order}</div>
+  </details>
+  ${STAGES.map((st, i) => {
+    const locked = i > 0 && !S.cleared[STAGES[i - 1].id], boss = st.waves.at(-1), done = S.cleared[st.id];
+    return `<article class="stage ${locked ? 'locked' : ''}">
+      <div class="stage-art">${landscape(st)}<span class="stage-tag">Stage ${i + 1}</span><div class="boss-port t-${boss.type}">${portrait(boss.look, boss.type)}</div></div>
+      <div class="stage-body">
+        <h3>${st.name}</h3>
+        <div class="meta"><span class="diff" aria-label="Difficulty ${st.stars} of 3">${'★'.repeat(st.stars)}${'☆'.repeat(3 - st.stars)}</span><span>${st.waves.length} waves</span>${done ? '<span class="clear-chip">CLEARED</span>' : ''}</div>
+        <p>${st.blurb}</p>
+        <div class="meta"><span>Boss <b>${boss.name}</b> <i class="tb t-${boss.type}">${boss.type}</i></span><span>Reward <b class="cost">${done ? st.replay : st.first}</b>${done ? '' : ' first clear'}</span></div>
+        <button class="btn go" data-act="start" data-arg="${i}" ${locked ? 'disabled' : ''}>${locked ? `Clear ${STAGES[i - 1].name} to unlock` : done ? 'Replay stage' : 'Start stage'}</button>
+      </div></article>`;
+  }).join('')}`;
+}
+
+function viewSummon(){
+  return `<h2 class="sec">Summon</h2><p class="sec-sub">Pull new fighters. Duplicates raise a fighter's Super Attack level (max 10).</p>
+  ${BANNERS.map(b => {
+    const [a, c] = b.feat.map(id => UNITS[id]);
+    return `<article class="banner"><div class="banner-art" style="--b1:${b.b1};--b2:${b.b2}"><div class="rays"></div>
+      <div class="feat-sub">${portrait(c.look, c.type)}</div><div class="feat-main">${portrait(a.look, a.type)}</div>
+      <div class="banner-title"><span class="kicker">Featured</span><h3>${b.name}</h3></div></div>
+      <div class="banner-body"><p>${b.blurb}</p>
+        <div class="cats">${b.feat.map(id => `<span>${UNITS[id].rar} ${UNITS[id].name} · ${UNITS[id].title}</span>`).join('')}</div>
+        <div class="rates">Rates: LR 1.5% · UR 6% · SSR 15% · SR 30% · R 47.5%. A multi-summon always includes at least one SSR or better.</div>
+        <div class="pull-row">
+          <button class="btn" data-act="pull" data-arg="${b.id}:1">Single <span class="cost">5</span></button>
+          <button class="btn hot" data-act="pull" data-arg="${b.id}:10">Multi ×10 <span class="cost">50</span></button>
+        </div></div></article>`;
+  }).join('')}`;
+}
+
+function teamStats(){
+  const team = S.team.filter(id => S.owned[id]);
+  if (!team.length) return {hp:0, lead:null};
+  const lead = UNITS[team[0]].lead;
+  return {lead, hp: team.reduce((a, id) => a + UNITS[id].hp * (1 + leadFor(lead, UNITS[id]).pct / 100), 0)};
+}
+function viewTeam(){
+  const {hp, lead} = teamStats();
+  const slots = Array.from({length:6}, (_, i) => {
+    const id = S.team[i];
+    return `<div>${id ? unitCard(id, {act:'slot', arg:i, lead:i === 0}) : `<button class="slot-empty" data-act="slot" data-arg="${i}" aria-label="Add fighter to slot ${i + 1}">+</button>`}
+      <div class="uc-name">${id ? UNITS[id].name : i === 0 ? 'Leader' : 'Empty'}</div></div>`;
+  }).join('');
+  return `<h2 class="sec">Team</h2><p class="sec-sub">Slot 1 is your leader. Bring 3 to 6 fighters; tap a slot to change it.</p>
+    <div class="lead-box"><span class="k">Leader skill</span>${lead ? `<b>${leadText(lead)}</b>` : '<span>Pick a leader.</span>'}
+      <div class="stats-row"><span>Team HP <b>${fmt(hp)}</b></span><span>Fighters <b>${S.team.length}/6</b></span></div></div>
+    <div class="grid3">${slots}</div>`;
+}
+function viewBox(){
+  const ids = Object.keys(UNITS).sort((a, b) => RANK[UNITS[b].rar] - RANK[UNITS[a].rar]);
+  const own = ids.filter(id => S.owned[id]).length;
+  return `<h2 class="sec">Box</h2><p class="sec-sub">${own} of ${ids.length} fighters collected. Tap one for details.</p>
+    <div class="grid4">${ids.map(id => S.owned[id]
+      ? `<div>${unitCard(id)}<div class="uc-name">${UNITS[id].name}</div></div>`
+      : `<div><div class="uc unknown r-${UNITS[id].rar}">${portrait(UNITS[id].look, UNITS[id].type)}</div><div class="uc-name">${UNITS[id].rar} · ???</div></div>`).join('')}</div>`;
+}
+
+function showDetail(id){
+  const u = UNITS[id], o = S.owned[id] || {lv:1, n:0};
+  const inTeam = S.team.indexOf(id);
+  modal(`<div class="detail-hd">${unitCard(id, {act:'none'})}<div>
+      <div class="title-sm">${u.title}</div><h3>${u.name}</h3>
+      <div class="cats" style="margin-top:6px"><i class="tb t-${u.type}">${u.type}</i>${u.cats.map(c => `<span>${c}</span>`).join('')}</div>
+      <div class="title-sm" style="margin-top:6px">SA Lv ${o.lv}/10 · Copies ${o.n}</div></div></div>
+    <div class="kv"><div><small>HP</small><b>${fmt(u.hp)}</b></div><div><small>ATK</small><b>${fmt(u.atk)}</b></div><div><small>DEF</small><b>${fmt(u.def)}</b></div></div>
+    <div class="skill t-${u.type}"><div class="k">Leader skill</div><p>${leadText(u.lead)}</p></div>
+    <div class="skill t-${u.type}"><div class="k">Super Attack · 12 ki</div><div class="n">${u.sa.name}</div><p>${saText(u.sa)}</p></div>
+    ${u.ultra ? `<div class="skill t-${u.type}"><div class="k">Ultra Super Attack · 18 ki</div><div class="n">${u.ultra.name}</div><p>${saText(u.ultra)}</p></div>` : ''}
+    <div class="skill t-${u.type}"><div class="k">Passive skill</div><div class="n">${u.pas.name}</div><p>${passiveText(u.pas)}</p></div>
+    <div class="row">${inTeam !== 0 && S.owned[id] ? `<button class="btn go" data-act="makelead" data-arg="${id}">Make leader</button>` : ''}<button class="btn" data-act="close">Close</button></div>`);
+}
+
+function showPicker(i){
+  pickSlot = i;
+  const ids = Object.keys(S.owned).sort((a, b) => RANK[UNITS[b].rar] - RANK[UNITS[a].rar]);
+  const cur = S.team[i];
+  modal(`<h3>${i === 0 ? 'Choose leader' : `Slot ${i + 1}`}</h3>
+    <div class="grid4">${ids.map(id => `<div>${unitCard(id, {act:'assign'})}<div class="uc-name">${S.team.includes(id) ? (id === cur ? 'Here' : 'In team') : UNITS[id].name}</div></div>`).join('')}</div>
+    <div class="row">${cur && S.team.length > 1 ? `<button class="btn" data-act="unassign">Remove</button>` : ''}${cur ? `<button class="btn" data-act="detail" data-arg="${cur}">Details</button>` : ''}<button class="btn" data-act="close">Close</button></div>`);
+}
+
+/* ================= summon ================= */
+function rollRarity(guarantee){
+  const pool = guarantee ? RATES.filter(r => RANK[r[0]] >= 2) : RATES;
+  let x = Math.random() * pool.reduce((a, r) => a + r[1], 0);
+  for (const [k, w] of pool){ if ((x -= w) < 0) return k; }
+  return pool.at(-1)[0];
+}
+function rollUnit(b, rar){
+  const ids = Object.keys(UNITS).filter(id => UNITS[id].rar === rar);
+  const feat = ids.filter(id => b.feat.includes(id));
+  return feat.length && Math.random() < 0.7 ? pick(feat) : pick(ids);
+}
+function pull(arg){
+  const [bid, nStr] = arg.split(':'), n = +nStr, cost = n === 10 ? 50 : 5, b = BANNERS.find(x => x.id === bid);
+  if (S.stones < cost){ toast(`You need ${cost} Ki Stones. Clear stages or claim the daily bonus.`); return; }
+  S.stones -= cost; S.pulls += n;
+  const res = [];
+  for (let i = 0; i < n; i++){
+    const guarantee = n === 10 && i === 9 && !res.some(r => RANK[UNITS[r.id].rar] >= 2);
+    const id = rollUnit(b, rollRarity(guarantee)), o = S.owned[id];
+    if (o){ o.n++; const up = o.lv < 10; o.lv = Math.min(10, o.lv + 1); res.push({id, isNew:false, up}); }
+    else { S.owned[id] = {lv:1, n:1}; res.push({id, isNew:true}); }
+  }
+  save(); render();
+  showSummon(res);
+}
+function showSummon(res){
+  const best = res.reduce((m, r) => Math.max(m, RANK[UNITS[r.id].rar]), 0);
+  const bestR = Object.keys(RANK).find(k => RANK[k] === best);
+  const oc = {R:'#b5794a', SR:'#c9d3e3', SSR:'#ffc93c', UR:'#ff6bd5', LR:'#ffffff'}[bestR];
+  const ov = document.createElement('div'); ov.className = 'summon';
+  ov.innerHTML = `<button class="orb ${bestR}" style="--oc:${oc}" aria-label="Open summon"></button><div class="hint">Tap the orb</div>`;
+  $('#app').append(ov);
+  ov.querySelector('.orb').addEventListener('click', () => {
+    ov.innerHTML = `<h3>${best >= 3 ? 'Incredible!' : best >= 2 ? 'Nice pull!' : 'Summon results'}</h3>
+      <div class="res-grid ${res.length === 1 ? 'one' : ''}">${res.map((r, i) => `<div class="res" style="animation-delay:${i * 90}ms">${unitCard(r.id, {act:'none', showLv:false})}<div class="tag ${r.isNew ? '' : 'dup'}">${r.isNew ? 'NEW' : r.up ? 'SA Lv +1' : 'Max SA'}</div></div>`).join('')}</div>
+      <div class="hint">${res.map(r => UNITS[r.id]).filter(u => RANK[u.rar] >= 2).map(u => `${u.rar} ${u.name}`).join(' · ') || 'No SSR this time'}</div>
+      <button class="btn go" data-act="closesummon">OK</button>`;
+  }, {once:true});
+}
+
+/* ================= battle ================= */
+const COLS = 6, ROWS = 5;
+let B = null;
+const rndSphere = () => Math.random() < 0.06 ? 'RBW' : TYPES[rnd(5)];
+
+function mkEnemy(w){ return {...w, max:w.hp, hp:w.hp, defDown:0, attacks:[], superTurn:false, superUsed:false}; }
+function startBattle(i){
+  const team = S.team.filter(id => S.owned[id]);
+  if (team.length < 3){ toast('Put at least 3 fighters in your team first.'); tab = 'team'; render(); return; }
+  const lead = UNITS[team[0]].lead;
+  const units = team.map(id => {
+    const u = UNITS[id], L = leadFor(lead, u), m = 1 + L.pct / 100;
+    return {id, u, lv:S.owned[id].lv, hp:u.hp * m, atk:u.atk * m, def:u.def * m, lki:L.ki, ki:0, atkUp:0, defUp:0};
+  });
+  const max = Math.round(units.reduce((a, x) => a + x.hp, 0));
+  B = {st:STAGES[i], si:i, wave:0, units, max, hp:max, turn:0, slot:0, gauge:0, burst:false, busy:false, stun:false,
+       board:Array.from({length:COLS * ROWS}, rndSphere), fresh:null};
+  B.enemy = mkEnemy(B.st.waves[0]);
+  buildBattle();
+  waveBanner(1).then(beginTurn);
+}
+function buildBattle(){
+  const el = document.createElement('section'); el.className = 'battle'; el.id = 'battle';
+  el.innerHTML = `<div class="b-top"><b>${B.st.name}</b><span id="b-wave"></span><span class="spacer"></span><button class="retreat" data-act="retreat">Retreat</button></div>
+    <div class="b-enemy" id="b-enemy">${landscape(B.st)}<div class="e-port" id="e-port"></div><div class="e-info"><div class="e-name" id="e-name"></div><div class="bar ehp"><i id="e-bar"></i></div><div class="bar-lab"><span id="e-hp"></span><span class="e-status" id="e-status"></span></div></div></div>
+    <div class="b-team"><div><div class="bar-lab"><span>Team HP</span><span id="t-hp"></span></div><div class="bar thp" id="t-barw"><i id="t-bar"></i></div></div>
+      <button class="burst" id="burst" data-act="burst" disabled>BURST</button>
+      <div class="bar gauge" title="Burst gauge"><i id="g-bar"></i></div></div>
+    <div class="rot" id="rot"></div>
+    <div class="board-wrap"><div class="board" id="board" role="grid" aria-label="Ki spheres"></div></div>
+    <div class="b-log" id="b-log" aria-live="polite"></div>`;
+  $('#app').append(el);
+  const bd = el.querySelector('#board');
+  bd.addEventListener('click', e => { const t = e.target.closest('.sp'); if (t) tapSphere(+t.dataset.i); });
+  bd.addEventListener('pointerover', e => { const t = e.target.closest('.sp'); if (t) preview(+t.dataset.i); });
+  bd.addEventListener('pointerleave', () => preview(-1));
+  renderEnemy(); renderTeam(); renderBoard();
+}
+function log(t){ const l = $('#b-log'); if (l) l.textContent = t; }
+function renderEnemy(){
+  const e = B.enemy;
+  $('#b-wave').textContent = `Wave ${B.wave + 1}/${B.st.waves.length} · Turn ${B.turn + 1}`;
+  const p = $('#e-port'); p.className = `e-port t-${e.type}`; p.innerHTML = portrait(e.look, e.type);
+  $('#e-name').innerHTML = `<i class="tb t-${e.type}">${e.type}</i>${e.name}${e.boss ? '<span class="boss">BOSS</span>' : ''}`;
+  updEnemy();
+}
+function updEnemy(){
+  const e = B.enemy;
+  $('#e-bar').style.width = (e.hp / e.max * 100) + '%';
+  $('#e-hp').textContent = `${fmt(e.hp)} / ${fmt(e.max)}`;
+  const st = [];
+  if (e.defDown) st.push(`DEF −${e.defDown}%`);
+  if (B.stun) st.push('Stunned');
+  $('#e-status').innerHTML = st.map(s => `<span>${s}</span>`).join('');
+}
+function renderTeam(){
+  $('#t-hp').textContent = `${fmt(B.hp)} / ${fmt(B.max)}`;
+  $('#t-bar').style.width = (B.hp / B.max * 100) + '%';
+  $('#t-barw').classList.toggle('low', B.hp / B.max < 0.3);
+  $('#g-bar').style.width = B.gauge + '%';
+  const bt = $('#burst');
+  bt.disabled = !(B.gauge >= 100 && !B.burst && B.slot < 3);
+  bt.className = 'burst' + (B.burst ? ' on' : B.gauge >= 100 ? ' ready' : '');
+  bt.textContent = B.burst ? 'BURSTING' : 'BURST';
+  $('#battle').classList.toggle('bursting', B.burst);
+}
+function kiLabel(x){ return x.u.rar === 'LR' && x.ki >= 18 ? '<span class="sa ultra">ULTRA</span>' : x.ki >= 12 ? '<span class="sa">SUPER</span>' : '<span></span>'; }
+function renderRot(){
+  if (!B.rot) return;
+  const e = B.enemy;
+  $('#rot').innerHTML = B.rot.map((x, k) => {
+    const hits = B.stun ? 0 : e.attacks.filter(s => s === k).length;
+    const sup = !B.stun && e.superTurn && !e.superUsed && e.attacks[0] === k;
+    let segs = ''; for (let i = 0; i < 12; i++) segs += `<i class="${x.ki > 12 + i && maxKiOf(x.u) > 12 ? 'k2' : x.ki > i ? 'k1' : ''}"></i>`;
+    return `<div class="slot r-${x.u.rar} ${k === B.slot ? 'active' : ''} ${x.done ? 'done' : ''}" id="slot${k}">
+      ${hits ? `<div class="warn">${sup ? '<span class="sup">SUPER</span>' : ''}<span>! ×${hits}</span></div>` : ''}
+      <div class="slot-hd"><div class="slot-pt">${portrait(x.u.look, x.u.type)}</div><div class="slot-nm"><b>${x.u.name}</b><i class="tb t-${x.u.type}">${x.u.type}</i> <span style="color:var(--rc);font-weight:700">${x.u.rar}</span></div></div>
+      <div class="ki">${segs}</div><div class="ki-row">${kiLabel(x)}<span>${x.ki}/${maxKiOf(x.u)} ki</span></div></div>`;
+  }).join('');
+}
+function renderBoard(){
+  $('#board').innerHTML = B.board.map((v, i) => `<button class="sp s-${v} ${B.fresh && B.fresh.has(i) ? 'new' : ''}" data-i="${i}" data-l="${v === 'RBW' ? '' : v[0]}" aria-label="${v === 'RBW' ? 'Rainbow' : v} sphere"></button>`).join('');
+  B.fresh = null;
+}
+function flood(i0){
+  const bd = B.board, t = bd[i0], seen = new Set([i0]), q = [i0];
+  while (q.length){
+    const i = q.pop(), r = Math.floor(i / COLS), c = i % COLS;
+    for (const [dr, dc] of [[1,0],[-1,0],[0,1],[0,-1]]){
+      const nr = r + dr, nc = c + dc; if (nr < 0 || nr >= ROWS || nc < 0 || nc >= COLS) continue;
+      const j = nr * COLS + nc; if (seen.has(j)) continue;
+      if (bd[j] === t || (t !== 'RBW' && bd[j] === 'RBW')){ seen.add(j); q.push(j); }
+    }
+  }
+  return [...seen];
+}
+function kiGain(x, chain){ return chain.reduce((a, i) => a + (B.board[i] === x.u.type ? 2 : 1), 0) + (B.burst ? 12 : 0); }
+function preview(i){
+  document.querySelectorAll('.sp.hl').forEach(s => s.classList.remove('hl'));
+  document.querySelectorAll('.preview').forEach(p => p.remove());
+  if (i < 0 || !B || B.busy || B.slot > 2) return;
+  const chain = flood(i), sp = document.querySelectorAll('.sp');
+  chain.forEach(j => sp[j] && sp[j].classList.add('hl'));
+  const slot = $('#slot' + B.slot); if (!slot) return;
+  const p = document.createElement('div'); p.className = 'preview'; p.textContent = `+${kiGain(B.rot[B.slot], chain)} ki`; slot.append(p);
+}
+function collapse(chain){
+  const rm = new Set(chain); B.fresh = new Set();
+  for (let c = 0; c < COLS; c++){
+    const keep = [];
+    for (let r = ROWS - 1; r >= 0; r--){ const i = r * COLS + c; if (!rm.has(i)) keep.push(B.board[i]); }
+    let r = ROWS - 1;
+    for (const v of keep){ B.board[r * COLS + c] = v; r--; }
+    for (; r >= 0; r--){ const i = r * COLS + c; B.board[i] = rndSphere(); B.fresh.add(i); }
+  }
+}
+function popAt(container, text, cls, x = 50, y = 40){
+  if (!container) return;
+  const p = document.createElement('div'); p.className = 'pop-n ' + (cls || ''); p.textContent = text;
+  p.style.left = x + '%'; p.style.top = y + '%'; container.append(p); setTimeout(() => p.remove(), 1200);
+}
+function heal(pct){ const amt = B.max * pct / 100; B.hp = Math.min(B.max, B.hp + amt); popAt($('.b-team'), `+${fmt(amt)} HP`, 'info small', 30, 0); }
+
+function beginTurn(){
+  const n = B.units.length;
+  B.rot = [0, 1, 2].map(k => B.units[(B.turn * 3 + k) % n]);
+  B.rot.forEach(x => { x.ki = Math.min(maxKiOf(x.u), (x.u.pas.ki || 0) + x.lki); x.defUp = 0; x.done = false; });
+  B.slot = 0; B.burst = false; B.stun = false;
+  const e = B.enemy;
+  e.attacks = Array.from({length:e.hits}, () => rnd(3)).sort((a, b) => a - b);
+  e.superTurn = (B.turn + 1) % 3 === 0; e.superUsed = false;
+  renderEnemy(); renderTeam(); renderRot();
+  log(`${e.name} will attack ${[...new Set(e.attacks)].map(k => B.rot[k].u.name).join(' and ')}${e.superTurn ? ', with a Super Attack' : ''}. Tap spheres for ${B.rot[0].u.name}.`);
+  B.busy = false;
+}
+
+async function tapSphere(i){
+  if (!B || B.busy || B.slot > 2) return;
+  B.busy = true; preview(-1);
+  const chain = flood(i), x = B.rot[B.slot];
+  const gain = kiGain(x, chain);
+  B.gauge = Math.min(100, B.gauge + chain.length * 3);
+  const sp = document.querySelectorAll('.sp'); chain.forEach(j => sp[j].classList.add('take'));
+  await wait(260);
+  collapse(chain); renderBoard();
+  x.ki = Math.min(maxKiOf(x.u), x.ki + gain);
+  renderRot(); renderTeam();
+  await wait(220);
+  const killed = await unitAttack(x);
+  if (killed){ await enemyDown(); return; }
+  await enemyStrikes(B.slot);
+  if (B.hp <= 0){ defeat(); return; }
+  x.done = true; B.slot++;
+  if (B.slot > 2){ renderRot(); await wait(350); B.turn++; beginTurn(); }
+  else { renderRot(); renderTeam(); log(`Tap spheres for ${B.rot[B.slot].u.name}.`); B.busy = false; }
+}
+
+async function unitAttack(x){
+  const e = B.enemy, u = x.u;
+  let kind = 'normal', sa = null;
+  if (u.ultra && x.ki >= 18){ kind = 'ultra'; sa = u.ultra; }
+  else if (x.ki >= 12){ kind = 'super'; sa = u.sa; }
+  const kiM = kind === 'normal' ? 1 + x.ki * 0.06 : 1.5 + Math.max(0, x.ki - 12) * (0.5 / 12);
+  const saM = sa ? sa.mult + 0.05 * (x.lv - 1) : 1;
+  const atk = x.atk * (1 + ((u.pas.atk || 0) + x.atkUp) / 100) * (B.burst ? 1.5 : 1) * kiM * saM;
+  const crit = Math.random() * 100 < (u.pas.crit || 0);
+  const tm = typeMult(u.type, e.type);
+  const edef = e.def * (1 - e.defDown / 100);
+  const dmg = Math.max(1, Math.round((atk * tm * (crit ? 1.5 : 1) - (crit ? 0 : edef)) * (0.97 + Math.random() * 0.06)));
+  if (sa) await superFlash(x, sa, kind);
+  const port = $('#e-port'); port.classList.remove('hit'); void port.offsetWidth; port.classList.add('hit');
+  e.hp = Math.max(0, e.hp - dmg);
+  popAt($('#b-enemy'), fmt(dmg), crit ? 'crit' : kind === 'ultra' ? 'big' : '', 50, 30);
+  if (crit) popAt($('#b-enemy'), 'CRITICAL', 'info', 50, 12);
+  else if (tm > 1) popAt($('#b-enemy'), 'Type advantage', 'info small', 50, 12);
+  else if (tm < 1) popAt($('#b-enemy'), 'Resisted', 'bad small', 50, 12);
+  let note = '';
+  if (sa){
+    const f = sa.eff || {};
+    if (f.atkUp){ x.atkUp += f.atkUp; note += ` ATK +${f.atkUp}%.`; }
+    if (f.defUp){ x.defUp = f.defUp; note += ` DEF +${f.defUp}% this turn.`; }
+    if (f.defDown){ e.defDown = Math.min(60, e.defDown + f.defDown); note += ` Enemy DEF −${f.defDown}%.`; }
+    if (f.heal) heal(f.heal);
+    if (f.stun && Math.random() * 100 < f.stun){ B.stun = true; popAt($('#b-enemy'), 'STUNNED', 'info', 50, 55); note += ' Enemy stunned!'; }
+    if (u.pas.healSA) heal(u.pas.healSA);
+  }
+  log(`${u.name} ${sa ? `used ${sa.name}` : 'attacked'} for ${fmt(dmg)} damage.${note}`);
+  updEnemy(); renderTeam(); renderRot();
+  await wait(520);
+  return e.hp <= 0;
+}
+
+async function superFlash(x, sa, kind){
+  const el = document.createElement('div');
+  el.className = `flash t-${x.u.type}${kind === 'ultra' ? ' ultra' : ''}`;
+  el.innerHTML = `<div class="fl-art">${portrait(x.u.look, x.u.type)}</div><div class="fl-txt"><small>${kind === 'ultra' ? 'Ultra Super Attack' : 'Super Attack'}</small><b>${sa.name}</b></div>`;
+  $('#battle').append(el);
+  await wait(1050); el.remove();
+}
+
+async function enemyStrikes(k){
+  const e = B.enemy, n = e.attacks.filter(s => s === k).length;
+  if (!n || B.stun) return;
+  const x = B.rot[k];
+  for (let h = 0; h < n; h++){
+    const isSup = e.superTurn && !e.superUsed; if (isSup) e.superUsed = true;
+    await wait(200);
+    if (isSup){ await superFlash({u:{type:e.type, look:e.look}}, {name:e.sup || 'Fury Blast'}, 'super'); }
+    const port = $('#e-port'); port.classList.remove('lunge'); void port.offsetWidth; port.classList.add('lunge');
+    await wait(220);
+    const slot = $('#slot' + k);
+    if (Math.random() * 100 < (x.u.pas.dodge || 0)){ popAt(slot, 'DODGE', 'info', 50, 10); log(`${x.u.name} evaded the attack!`); await wait(400); continue; }
+    const tmD = BEATS[e.type] === x.u.type ? 1.5 : BEATS[x.u.type] === e.type ? 0.5 : 1;
+    const raw = e.atk * (isSup ? 1.8 : 1) * tmD;
+    const def = x.def * (1 + ((x.u.pas.def || 0) + x.defUp) / 100) * 0.8;
+    const dmg = Math.round(Math.max(raw * 0.12, raw - def));
+    B.hp = Math.max(0, B.hp - dmg);
+    if (slot){ slot.classList.remove('hit'); void slot.offsetWidth; slot.classList.add('hit'); }
+    popAt(slot, `−${fmt(dmg)}`, 'bad', 50, 10);
+    log(`${e.name} hit ${x.u.name} for ${fmt(dmg)}${tmD > 1 ? ' (type disadvantage)' : tmD < 1 ? ' (resisted)' : ''}.`);
+    renderTeam();
+    await wait(450);
+    if (B.hp <= 0) return;
+  }
+  renderRot();
+}
+
+async function waveBanner(n){
+  const boss = B.st.waves[n - 1].boss;
+  const el = document.createElement('div'); el.className = 'wave-ban' + (boss ? ' boss' : '');
+  el.textContent = boss ? 'BOSS BATTLE' : `WAVE ${n}`;
+  $('#b-enemy').append(el); B.busy = true;
+  await wait(950); el.remove();
+}
+async function enemyDown(){
+  const port = $('#e-port'); port.classList.add('down');
+  log(`${B.enemy.name} is defeated!`);
+  await wait(700);
+  B.wave++;
+  if (B.wave >= B.st.waves.length){ victory(); return; }
+  B.enemy = mkEnemy(B.st.waves[B.wave]); B.turn++;
+  renderEnemy();
+  await waveBanner(B.wave + 1);
+  beginTurn();
+}
+function endBattle(){ const b = $('#battle'); if (b) b.remove(); B = null; closeModal(); render(); }
+function victory(){
+  const st = B.st, first = !S.cleared[st.id], gain = first ? st.first : st.replay;
+  S.stones += gain; S.cleared[st.id] = 1; save();
+  const next = STAGES[B.si + 1];
+  B.busy = true;
+  modal(`<h3 style="color:var(--gold);font-size:40px;text-align:center">STAGE CLEAR!</h3>
+    <p style="margin:0;text-align:center;color:var(--muted)">${st.name} cleared in ${B.turn + 1} turns with ${Math.round(B.hp / B.max * 100)}% HP left.</p>
+    <div class="kv"><div><small>REWARD</small><b class="cost">${gain}</b></div><div><small>${first ? 'FIRST CLEAR' : 'REPLAY'}</small><b>${first ? 'Yes' : 'No'}</b></div><div><small>STONES</small><b>${fmt(S.stones)}</b></div></div>
+    ${first && next ? `<p style="margin:0;text-align:center">New stage unlocked: <b>${next.name}</b></p>` : ''}
+    <div class="row"><button class="btn" data-act="leave">Quests</button><button class="btn go" data-act="${first && next ? 'start' : 'restart'}" data-arg="${first && next ? B.si + 1 : B.si}">${first && next ? 'Next stage' : 'Replay'}</button></div>`);
+}
+function defeat(){
+  B.busy = true;
+  modal(`<h3 style="color:var(--hot);font-size:40px;text-align:center">DEFEATED</h3>
+    <p style="margin:0;text-align:center;color:var(--muted)">${B.enemy.name} was too strong. Try a leader whose skill covers more of your team, collect matching spheres to hit Super Attacks, or summon new fighters.</p>
+    <div class="row"><button class="btn" data-act="leave">Quests</button><button class="btn go" data-act="restart" data-arg="${B.si}">Retry</button></div>`);
+}
+
+/* ================= actions ================= */
+const ACT = {
+  tab(a){ tab = a; render(); },
+  daily(){ if (S.daily === today()) return; S.daily = today(); S.stones += 20; save(); render(); toast('Daily bonus: +20 Ki Stones'); },
+  start(a){ closeModal(); if (B) { $('#battle').remove(); B = null; } startBattle(+a); },
+  restart(a){ ACT.start(a); },
+  leave(){ endBattle(); },
+  retreat(){ if (!B) return; modal(`<h3>Leave the battle?</h3><p style="margin:0;color:var(--muted)">You will lose progress in this stage. Stones you already spent are not affected.</p><div class="row"><button class="btn" data-act="close">Keep fighting</button><button class="btn hot" data-act="leave">Retreat</button></div>`); },
+  burst(){ if (!B || B.busy || B.gauge < 100 || B.burst) return; B.burst = true; B.gauge = 0; renderTeam(); log('BURST! +12 ki on every collect and +50% ATK for the rest of this turn.'); popAt($('#b-enemy'), 'BURST!', 'big', 50, 50); },
+  pull(a){ pull(a); },
+  closesummon(){ document.querySelectorAll('.summon').forEach(s => s.remove()); },
+  detail(a){ showDetail(a); },
+  close(){ closeModal(); },
+  none(){},
+  slot(a){ showPicker(+a); },
+  assign(id){
+    const i = pickSlot, cur = S.team[i], at = S.team.indexOf(id);
+    if (at >= 0 && cur) S.team[at] = cur;           // swap places
+    else if (at >= 0) S.team.splice(at, 1);         // move into an empty slot
+    if (i >= S.team.length) S.team.push(id); else S.team[i] = id;
+    S.team = S.team.filter(Boolean);
+    save(); closeModal(); render();
+  },
+  unassign(){ S.team.splice(pickSlot, 1); save(); closeModal(); render(); },
+  makelead(id){ S.team = [id, ...S.team.filter(t => t !== id)].slice(0, 6); save(); closeModal(); tab = 'team'; render(); toast(`${UNITS[id].name} is now your leader.`); },
+};
+document.addEventListener('click', e => {
+  const t = e.target.closest('[data-act]'); if (!t || t.disabled) return;
+  const f = ACT[t.dataset.act]; if (f) f(t.dataset.arg);
+});
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.modal-bg') && !(B && B.busy)) closeModal(); });
+
+function start(data){ if (data && data.tab) tab = data.tab; render(); }
+if (window.claude && window.claude.hot && window.claude.hot.snapshot) window.claude.hot.snapshot(() => ({tab}));
+window.claude?.hot?.ready ? window.claude.hot.ready(start) : start(window.claude?.hot?.data ?? {});
+</script>
+</body>
+</html>
