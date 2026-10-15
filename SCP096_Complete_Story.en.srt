@@ -1,0 +1,799 @@
+1
+00:00:00,600 --> 00:00:03,025
+This is a photograph of a mountain range.
+
+2
+00:00:03,545 --> 00:00:06,366
+A hiker took it on a cold, clear morning.
+
+3
+00:00:06,386 --> 00:00:08,098
+Nothing unusual about it.
+
+4
+00:00:08,818 --> 00:00:10,077
+Except... right here.
+
+5
+00:00:11,247 --> 00:00:12,024
+Four pixels.
+
+6
+00:00:12,044 --> 00:00:14,152
+A tiny, pale shape on the ridge.
+
+7
+00:00:14,922 --> 00:00:17,819
+Years after this photo was taken, those four
+
+8
+00:00:17,839 --> 00:00:20,339
+pixels got the man who took it killed.
+
+9
+00:00:22,409 --> 00:00:26,576
+This is the complete story of SCP-096.
+
+10
+00:00:30,546 --> 00:00:33,366
+The Foundation files it as Euclid.
+
+11
+00:00:33,386 --> 00:00:34,118
+Humanoid.
+
+12
+00:00:34,138 --> 00:00:37,125
+2.38 meters tall, nearly eight feet.
+
+13
+00:00:37,745 --> 00:00:38,485
+It's thin.
+
+14
+00:00:38,505 --> 00:00:40,081
+Malnourished, almost.
+
+15
+00:00:40,101 --> 00:00:42,664
+Its arms are about 1.5 meters long
+
+16
+00:00:42,684 --> 00:00:45,096
+each, far too long for its body.
+
+17
+00:00:45,716 --> 00:00:47,951
+Its skin has almost no pigment.
+
+18
+00:00:47,971 --> 00:00:48,533
+No hair.
+
+19
+00:00:48,553 --> 00:00:51,007
+Its eyes have no color at all, and
+
+20
+00:00:51,027 --> 00:00:53,336
+nobody knows if it can even see.
+
+21
+00:00:53,956 --> 00:00:54,883
+And its jaw...
+
+22
+00:00:54,903 --> 00:00:56,981
+can open to four times the size
+
+23
+00:00:57,001 --> 00:00:58,334
+of a normal human's.
+
+24
+00:00:59,104 --> 00:01:00,644
+Researchers found no sign of
+
+25
+00:01:00,664 --> 00:01:01,869
+higher brain function.
+
+26
+00:01:02,589 --> 00:01:03,971
+But none of that is what
+
+27
+00:01:03,991 --> 00:01:05,081
+makes it dangerous.
+
+28
+00:01:05,951 --> 00:01:08,037
+Most days, it's completely calm.
+
+29
+00:01:08,057 --> 00:01:10,735
+It paces by the eastern wall of its cell.
+
+30
+00:01:11,205 --> 00:01:12,197
+Back and forth.
+
+31
+00:01:12,217 --> 00:01:13,210
+Back and forth.
+
+32
+00:01:13,980 --> 00:01:15,831
+And that's the scariest part.
+
+33
+00:01:15,851 --> 00:01:17,380
+Because it stays calm...
+
+34
+00:01:17,400 --> 00:01:19,832
+right up until somebody sees its face.
+
+35
+00:01:23,302 --> 00:01:24,256
+Here's the rule.
+
+36
+00:01:24,776 --> 00:01:28,651
+If you see 096's face, in person, on video,
+
+37
+00:01:28,671 --> 00:01:32,636
+or even in a photograph, you become what the
+
+38
+00:01:32,656 --> 00:01:35,082
+Foundation calls SCP-096-1.
+
+39
+00:01:35,852 --> 00:01:37,792
+The moment that happens, it changes.
+
+40
+00:01:38,312 --> 00:01:40,665
+It covers its face with its hands.
+
+41
+00:01:40,685 --> 00:01:42,131
+It screams. It cries.
+
+42
+00:01:42,151 --> 00:01:44,923
+It babbles things nobody can understand.
+
+43
+00:01:45,543 --> 00:01:47,296
+About one to two minutes later...
+
+44
+00:01:47,966 --> 00:01:49,053
+it starts running.
+
+45
+00:01:50,223 --> 00:01:52,356
+It doesn't need to know where you are.
+
+46
+00:01:52,376 --> 00:01:53,149
+It just knows.
+
+47
+00:01:53,169 --> 00:01:54,905
+Any direction, any distance, it
+
+48
+00:01:54,925 --> 00:01:56,209
+heads straight for you.
+
+49
+00:01:56,729 --> 00:02:00,007
+Recorded speeds start at 35 km/h.
+
+50
+00:02:00,027 --> 00:02:02,405
+The top speed? Redacted.
+
+51
+00:02:03,175 --> 00:02:05,397
+No material, no method, nothing the
+
+52
+00:02:05,417 --> 00:02:07,959
+Foundation has tried has ever stopped it
+
+53
+00:02:07,979 --> 00:02:09,561
+from reaching its target.
+
+54
+00:02:10,281 --> 00:02:11,919
+And it doesn't matter how
+
+55
+00:02:11,939 --> 00:02:13,179
+small the image is.
+
+56
+00:02:13,199 --> 00:02:15,102
+Or how long ago it was taken.
+
+57
+00:02:15,972 --> 00:02:18,290
+And when it does, the file says only this.
+
+58
+00:02:18,910 --> 00:02:22,642
+In 100% of cases, no traces were left.
+
+59
+00:02:23,812 --> 00:02:25,035
+Then it sits down.
+
+60
+00:02:25,055 --> 00:02:25,932
+Calms itself.
+
+61
+00:02:25,952 --> 00:02:27,933
+And quietly tries to go home.
+
+62
+00:02:28,803 --> 00:02:30,850
+One small mercy: drawings of its
+
+63
+00:02:30,870 --> 00:02:32,271
+face don't trigger it.
+
+64
+00:02:32,291 --> 00:02:33,563
+Only the real thing.
+
+65
+00:02:34,083 --> 00:02:36,322
+Which is why you can watch this video.
+
+66
+00:02:37,042 --> 00:02:37,890
+Probably.
+
+67
+00:02:41,460 --> 00:02:43,613
+So how do you contain something like that?
+
+68
+00:02:44,233 --> 00:02:46,919
+SCP-096 lives in a sealed steel
+
+69
+00:02:46,939 --> 00:02:49,450
+cube, 5 meters on every side.
+
+70
+00:02:49,470 --> 00:02:50,236
+Airtight.
+
+71
+00:02:50,756 --> 00:02:52,277
+Every week, staff check every
+
+72
+00:02:52,297 --> 00:02:53,446
+inch of it for cracks.
+
+73
+00:02:54,166 --> 00:02:56,461
+And one rule is never broken.
+
+74
+00:02:56,481 --> 00:02:58,137
+No cameras. No video.
+
+75
+00:02:58,157 --> 00:03:00,532
+No optical devices of any kind
+
+76
+00:03:00,552 --> 00:03:02,368
+inside that cell. Ever.
+
+77
+00:03:03,138 --> 00:03:05,459
+Guards rely on pressure sensors and
+
+78
+00:03:05,479 --> 00:03:07,064
+laser detectors instead.
+
+79
+00:03:07,084 --> 00:03:08,802
+They know it's in there...
+
+80
+00:03:08,822 --> 00:03:10,608
+without ever looking at it.
+
+81
+00:03:11,278 --> 00:03:13,621
+Even a photo of it needs approval
+
+82
+00:03:13,641 --> 00:03:15,339
+from the very top of the
+
+83
+00:03:15,359 --> 00:03:17,272
+Foundation, the O5 Council.
+
+84
+00:03:17,942 --> 00:03:19,852
+But it wasn't always in a box.
+
+85
+00:03:19,872 --> 00:03:21,782
+Someone had to catch it first.
+
+86
+00:03:25,152 --> 00:03:28,003
+This next part comes from a recorded
+
+87
+00:03:28,023 --> 00:03:31,512
+interview with a retired captain, the leader
+
+88
+00:03:31,532 --> 00:03:34,143
+of the team sent to bring 096 in.
+
+89
+00:03:34,163 --> 00:03:35,259
+Team Zulu 9-A.
+
+90
+00:03:35,979 --> 00:03:37,206
+Two helicopters.
+
+91
+00:03:37,226 --> 00:03:39,931
+A frozen wasteland, far below zero.
+
+92
+00:03:40,451 --> 00:03:42,624
+They spot the target north of their
+
+93
+00:03:42,644 --> 00:03:44,816
+patrol path, facing away from them.
+
+94
+00:03:45,436 --> 00:03:47,354
+And the first thing the captain
+
+95
+00:03:47,374 --> 00:03:49,041
+notices is that it's naked.
+
+96
+00:03:49,061 --> 00:03:49,854
+In that cold.
+
+97
+00:03:49,874 --> 00:03:51,291
+And it isn't shivering.
+
+98
+00:03:52,161 --> 00:03:53,717
+They move in to bag it.
+
+99
+00:03:53,737 --> 00:03:56,526
+Right then, the captain's radio goes off.
+
+100
+00:03:56,546 --> 00:03:57,760
+A doctor, calling.
+
+101
+00:03:57,780 --> 00:03:59,404
+He turns away to answer.
+
+102
+00:04:00,074 --> 00:04:01,590
+That call saved his life.
+
+103
+00:04:02,210 --> 00:04:04,342
+Because his squad didn't turn away.
+
+104
+00:04:04,362 --> 00:04:05,449
+They saw its face.
+
+105
+00:04:07,219 --> 00:04:08,573
+It tore through the squad.
+
+106
+00:04:09,093 --> 00:04:10,870
+They hit it with rifles.
+
+107
+00:04:10,890 --> 00:04:12,367
+An anti-tank rocket.
+
+108
+00:04:12,387 --> 00:04:15,062
+A helicopter machine gun, around 600
+
+109
+00:04:15,082 --> 00:04:17,832
+.50-caliber rounds in twenty seconds,
+
+110
+00:04:17,852 --> 00:04:19,554
+by the captain's count.
+
+111
+00:04:20,424 --> 00:04:21,505
+None of it mattered.
+
+112
+00:04:22,775 --> 00:04:25,679
+It only stopped when the second team, Zulu
+
+113
+00:04:25,699 --> 00:04:28,117
+9-B, did something nobody expected.
+
+114
+00:04:28,637 --> 00:04:30,403
+They slipped a bag over its head.
+
+115
+00:04:31,273 --> 00:04:32,710
+And it... just sat down.
+
+116
+00:04:32,730 --> 00:04:33,438
+Quiet. Calm.
+
+117
+00:04:33,458 --> 00:04:35,016
+Like nothing had happened.
+
+118
+00:04:36,086 --> 00:04:37,898
+At the end of the interview, the
+
+119
+00:04:37,918 --> 00:04:39,959
+doctor offers to show the captain an
+
+120
+00:04:39,979 --> 00:04:41,562
+artist's sketch of its face.
+
+121
+00:04:42,082 --> 00:04:43,014
+He refuses.
+
+122
+00:04:43,034 --> 00:04:45,609
+Then he formally requests that
+
+123
+00:04:45,629 --> 00:04:47,167
+096 be terminated.
+
+124
+00:04:50,637 --> 00:04:52,337
+Remember that mountain photo?
+
+125
+00:04:52,357 --> 00:04:53,998
+This is where it comes back.
+
+126
+00:04:54,718 --> 00:04:56,274
+Incident 096-1-A.
+
+127
+00:04:56,294 --> 00:04:59,518
+SCP-096 breaks out of its cell at a
+
+128
+00:04:59,538 --> 00:05:01,836
+Foundation research site.
+
+129
+00:05:02,356 --> 00:05:04,797
+The staff who see its face don't make it.
+
+130
+00:05:04,817 --> 00:05:06,597
+The site is sealed and gassed.
+
+131
+00:05:07,417 --> 00:05:09,552
+Then it's out, running across the desert.
+
+132
+00:05:10,022 --> 00:05:12,603
+Helicopters chase it, and fall behind.
+
+133
+00:05:12,623 --> 00:05:13,629
+Snipers hit it.
+
+134
+00:05:13,649 --> 00:05:15,066
+It doesn't slow down.
+
+135
+00:05:15,736 --> 00:05:18,617
+Task force teams race ahead in tiltrotor
+
+136
+00:05:18,637 --> 00:05:21,445
+aircraft, evacuating towns in its path.
+
+137
+00:05:21,915 --> 00:05:24,056
+It crosses Interstate 40, smashing
+
+138
+00:05:24,076 --> 00:05:25,645
+straight through traffic.
+
+139
+00:05:26,415 --> 00:05:27,085
+Its target?
+
+140
+00:05:27,105 --> 00:05:28,401
+A former mountaineer.
+
+141
+00:05:28,971 --> 00:05:31,386
+Years earlier, he'd photographed
+
+142
+00:05:31,406 --> 00:05:32,984
+a mountain landscape.
+
+143
+00:05:33,004 --> 00:05:35,494
+And somewhere on that ridge, four
+
+144
+00:05:35,514 --> 00:05:37,625
+pixels wide, was 096's face.
+
+145
+00:05:38,295 --> 00:05:40,343
+He'd been given special goggles
+
+146
+00:05:40,363 --> 00:05:42,412
+designed to scramble the image.
+
+147
+00:05:42,432 --> 00:05:43,213
+They failed.
+
+148
+00:05:43,233 --> 00:05:44,814
+Just for a split second.
+
+149
+00:05:45,434 --> 00:05:46,428
+That was enough.
+
+150
+00:05:47,598 --> 00:05:49,478
+SCP-096 reached him in a
+
+151
+00:05:49,498 --> 00:05:51,062
+crowded town square.
+
+152
+00:05:51,082 --> 00:05:53,992
+The task force lost most of its team.
+
+153
+00:05:54,862 --> 00:05:57,626
+In the end, it was a single door gunner
+
+154
+00:05:57,646 --> 00:06:00,482
+who landed by the highway, where 096 was
+
+155
+00:06:00,502 --> 00:06:02,267
+tearing into a minivan...
+
+156
+00:06:02,287 --> 00:06:04,481
+and pulled a bag over its head.
+
+157
+00:06:05,201 --> 00:06:06,876
+Just like the first time.
+
+158
+00:06:06,896 --> 00:06:07,689
+It sat down.
+
+159
+00:06:07,709 --> 00:06:08,638
+It went quiet.
+
+160
+00:06:12,108 --> 00:06:14,326
+Even the Foundation doesn't
+
+161
+00:06:14,346 --> 00:06:16,067
+fully understand 096.
+
+162
+00:06:16,737 --> 00:06:18,609
+Its eyes have no pigment.
+
+163
+00:06:18,629 --> 00:06:19,517
+Is it blind?
+
+164
+00:06:19,537 --> 00:06:20,500
+Nobody knows.
+
+165
+00:06:20,520 --> 00:06:22,619
+It finds its victims anyway.
+
+166
+00:06:23,289 --> 00:06:25,463
+It shows no higher brain function.
+
+167
+00:06:25,483 --> 00:06:28,109
+And yet, when it's triggered, it babbles,
+
+168
+00:06:28,129 --> 00:06:30,239
+almost like it's trying to speak.
+
+169
+00:06:30,909 --> 00:06:32,905
+Why does a photograph trigger it,
+
+170
+00:06:32,925 --> 00:06:34,248
+but a drawing doesn't?
+
+171
+00:06:34,268 --> 00:06:35,470
+The file never says.
+
+172
+00:06:36,140 --> 00:06:38,564
+And after every attack, it tries to
+
+173
+00:06:38,584 --> 00:06:40,659
+return to its natural habitat.
+
+174
+00:06:40,679 --> 00:06:42,335
+Where is that? Redacted.
+
+175
+00:06:43,105 --> 00:06:44,737
+Some think it's suffering.
+
+176
+00:06:44,757 --> 00:06:46,262
+That the crying is real.
+
+177
+00:06:46,282 --> 00:06:47,533
+That all it wants...
+
+178
+00:06:47,553 --> 00:06:48,804
+is to never be seen.
+
+179
+00:06:52,274 --> 00:06:53,833
+So why not just destroy it?
+
+180
+00:06:54,453 --> 00:06:57,035
+A termination order was approved, and the
+
+181
+00:06:57,055 --> 00:06:58,940
+doctor sent to carry it out...
+
+182
+00:06:58,960 --> 00:07:00,590
+is heavily implied to have
+
+183
+00:07:00,610 --> 00:07:01,606
+never come back.
+
+184
+00:07:02,426 --> 00:07:04,041
+600 rounds. Rockets.
+
+185
+00:07:04,061 --> 00:07:04,695
+Snipers.
+
+186
+00:07:04,715 --> 00:07:06,249
+Nothing has worked.
+
+187
+00:07:06,869 --> 00:07:09,713
+Today, 096 sits in its steel cube,
+
+188
+00:07:09,733 --> 00:07:11,988
+pacing by the eastern wall.
+
+189
+00:07:12,008 --> 00:07:12,662
+Waiting.
+
+190
+00:07:13,382 --> 00:07:14,830
+For someone. Somewhere.
+
+191
+00:07:14,850 --> 00:07:15,851
+To see its face.
+
+192
+00:07:17,821 --> 00:07:20,495
+That's the complete story of SCP-096.
+
+193
+00:07:20,515 --> 00:07:22,388
+Would you have survived...
+
+194
+00:07:22,408 --> 00:07:24,208
+or would you have looked?
+
+195
+00:07:24,228 --> 00:07:25,956
+Tell me in the comments.
+
+196
+00:07:26,576 --> 00:07:28,616
+If you made it this far, you're
+
+197
+00:07:28,636 --> 00:07:30,344
+braver than team Zulu 9-A.
+
+198
+00:07:31,014 --> 00:07:32,592
+Next time: SCP-173.
+
+199
+00:07:32,612 --> 00:07:36,125
+The statue that only moves when you blink.
+
+200
+00:07:36,145 --> 00:07:38,733
+Subscribe so you don't miss it.
