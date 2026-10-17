@@ -1,0 +1,695 @@
+1
+00:00:01,400 --> 00:00:03,569
+You blink about fifteen times a minute.
+
+2
+00:00:04,469 --> 00:00:06,876
+Each blink lasts about
+a tenth of a second.
+
+3
+00:00:07,776 --> 00:00:09,262
+You don't even notice them.
+
+4
+00:00:10,362 --> 00:00:11,162
+It does.
+
+5
+00:00:14,428 --> 00:00:15,820
+This is SCP-173.
+
+6
+00:00:15,820 --> 00:00:17,734
+It's made of concrete.
+
+7
+00:00:17,734 --> 00:00:21,736
+And it cannot move while
+you're looking at it.
+
+8
+00:00:22,236 --> 00:00:25,527
+It was the very first SCP ever written.
+
+9
+00:00:25,527 --> 00:00:28,902
+The reason the entire Foundation exists.
+
+10
+00:00:29,352 --> 00:00:32,000
+And in 2022, it officially lost its face.
+
+11
+00:00:33,800 --> 00:00:37,183
+This is the complete story of SCP-173.
+
+12
+00:00:37,183 --> 00:00:38,697
+Try not to blink.
+
+13
+00:00:44,397 --> 00:00:47,082
+Every SCP file starts the same way.
+
+14
+00:00:47,082 --> 00:00:48,770
+This one did it first.
+
+15
+00:00:49,270 --> 00:00:51,597
+Item number: SCP-173.
+
+16
+00:00:51,597 --> 00:00:53,924
+Object class: Euclid.
+
+17
+00:00:54,374 --> 00:00:56,416
+Euclid means it can be contained...
+
+18
+00:00:56,416 --> 00:00:59,684
+but it's unpredictable, and
+nobody fully understands it.
+
+19
+00:01:00,284 --> 00:01:04,604
+According to the file, it
+was moved to Site-19 in 1993.
+
+20
+00:01:04,604 --> 00:01:07,746
+Where it came from is listed as unknown.
+
+21
+00:01:08,346 --> 00:01:12,186
+It's made of concrete and rebar,
+with traces of spray paint.
+
+22
+00:01:12,186 --> 00:01:15,002
+A brand you could buy
+at any hardware store.
+
+23
+00:01:15,502 --> 00:01:17,523
+Which means that, at some point...
+
+24
+00:01:17,523 --> 00:01:18,653
+someone painted it.
+
+25
+00:01:19,553 --> 00:01:21,698
+And it's not just a statue.
+
+26
+00:01:21,698 --> 00:01:23,764
+The file calls it animate.
+
+27
+00:01:23,764 --> 00:01:25,513
+And extremely hostile.
+
+28
+00:01:29,413 --> 00:01:33,401
+Everything about SCP-173
+comes down to one rule.
+
+29
+00:01:33,851 --> 00:01:36,751
+It cannot move while it's
+in a direct line of sight.
+
+30
+00:01:37,151 --> 00:01:39,760
+And that line of sight must not be broken.
+
+31
+00:01:39,760 --> 00:01:40,560
+At any time.
+
+32
+00:01:41,205 --> 00:01:42,847
+Nobody has ever seen it move.
+
+33
+00:01:42,847 --> 00:01:44,432
+Because if you can see it...
+
+34
+00:01:44,432 --> 00:01:45,232
+it can't.
+
+35
+00:01:45,942 --> 00:01:48,597
+But the moment nobody's looking, it can.
+
+36
+00:01:48,597 --> 00:01:51,717
+And the file lists exactly
+two ways it attacks.
+
+37
+00:01:52,167 --> 00:01:55,021
+It snaps the neck, at
+the base of the skull.
+
+38
+00:01:55,021 --> 00:01:56,059
+Or it strangles.
+
+39
+00:01:56,859 --> 00:02:02,698
+After an attack, staff follow something
+called Class 4 hazardous object containment
+
+40
+00:02:02,698 --> 00:02:03,498
+procedures.
+
+41
+00:02:03,472 --> 00:02:05,935
+The file never says what those are.
+
+42
+00:02:06,705 --> 00:02:08,186
+So the rule sounds simple.
+
+43
+00:02:08,186 --> 00:02:09,554
+Just keep looking at it.
+
+44
+00:02:10,054 --> 00:02:11,296
+The problem is...
+
+45
+00:02:11,296 --> 00:02:12,096
+you can't.
+
+46
+00:02:16,327 --> 00:02:20,084
+Every few seconds, for about a
+tenth of a second, you're blind.
+
+47
+00:02:20,084 --> 00:02:21,158
+You can't stop it.
+
+48
+00:02:21,158 --> 00:02:21,958
+Nobody can.
+
+49
+00:02:22,364 --> 00:02:24,113
+So nobody goes in alone.
+
+50
+00:02:24,513 --> 00:02:28,389
+The file says no fewer than three
+people may enter its container.
+
+51
+00:02:28,389 --> 00:02:30,476
+And the door is locked behind them.
+
+52
+00:02:30,876 --> 00:02:36,094
+Two of them must keep direct eye
+contact with SCP-173 the entire time...
+
+53
+00:02:36,094 --> 00:02:39,863
+until everyone is out, and
+the door is locked again.
+
+54
+00:02:40,313 --> 00:02:41,113
+Two watchers.
+
+55
+00:02:41,057 --> 00:02:44,435
+So when one of them blinks,
+the other one is still looking.
+
+56
+00:02:44,885 --> 00:02:45,685
+Sounds safe.
+
+57
+00:02:45,671 --> 00:02:47,112
+But let's do the math.
+
+58
+00:02:47,712 --> 00:02:52,871
+If two people blink at a normal rate, at
+random, sooner or later they blink at the
+
+59
+00:02:52,871 --> 00:02:54,003
+exact same moment.
+
+60
+00:02:54,466 --> 00:02:57,501
+On average, that would happen
+roughly once every minute.
+
+61
+00:02:57,951 --> 00:03:01,175
+Both of them blind, for a
+few hundredths of a second.
+
+62
+00:03:01,675 --> 00:03:05,401
+The file never says how fast SCP-173 is.
+
+63
+00:03:05,401 --> 00:03:07,171
+It doesn't need to.
+
+64
+00:03:07,971 --> 00:03:12,625
+That's why there's one more line in the
+procedures: personnel must alert one another
+
+65
+00:03:12,625 --> 00:03:13,511
+before blinking.
+
+66
+00:03:14,467 --> 00:03:15,347
+[radio] Blinking.
+
+67
+00:03:15,417 --> 00:03:16,317
+[radio] Watching.
+
+68
+00:03:16,467 --> 00:03:17,267
+[radio] Clear.
+
+69
+00:03:18,067 --> 00:03:19,009
+[radio] Blinking.
+
+70
+00:03:19,017 --> 00:03:19,955
+[radio] Watching.
+
+71
+00:03:20,567 --> 00:03:22,486
+Every blink, called out loud.
+
+72
+00:03:22,486 --> 00:03:24,803
+For as long as you're in that room.
+
+73
+00:03:25,303 --> 00:03:26,355
+And the third person?
+
+74
+00:03:26,355 --> 00:03:28,458
+The third person isn't watching it at all.
+
+75
+00:03:32,358 --> 00:03:35,357
+Because there's something
+on the floor of the cell.
+
+76
+00:03:35,357 --> 00:03:36,886
+A reddish-brown substance.
+
+77
+00:03:37,336 --> 00:03:38,755
+The file is specific.
+
+78
+00:03:38,755 --> 00:03:40,781
+It's a combination of feces...
+
+79
+00:03:40,781 --> 00:03:41,581
+and blood.
+
+80
+00:03:41,956 --> 00:03:44,096
+And the origin of both is unknown.
+
+81
+00:03:44,696 --> 00:03:47,873
+The enclosure has to be
+cleaned on a bi-weekly basis.
+
+82
+00:03:48,323 --> 00:03:50,838
+So, on a schedule, three people walk in.
+
+83
+00:03:50,838 --> 00:03:53,792
+Two of them stare at a
+statue without stopping.
+
+84
+00:03:53,792 --> 00:03:56,747
+And one of them mops the
+floor around its feet.
+
+85
+00:03:57,447 --> 00:03:58,517
+Whose blood is it?
+
+86
+00:03:58,517 --> 00:03:59,707
+The file never says.
+
+87
+00:04:03,807 --> 00:04:06,830
+And then there's the line most
+people find the creepiest.
+
+88
+00:04:07,280 --> 00:04:11,789
+Staff report the sound of scraping stone
+coming from inside the container...
+
+89
+00:04:11,789 --> 00:04:13,213
+when no one is in there.
+
+90
+00:04:13,813 --> 00:04:15,446
+The file calls this normal.
+
+91
+00:04:16,346 --> 00:04:17,432
+Think about it.
+
+92
+00:04:17,432 --> 00:04:20,545
+When the room is empty,
+nobody is watching.
+
+93
+00:04:20,545 --> 00:04:21,414
+So it moves.
+
+94
+00:04:21,414 --> 00:04:25,469
+Concrete dragging across
+concrete, behind a locked door.
+
+95
+00:04:26,169 --> 00:04:30,546
+Any change in this behaviour is to be
+reported to the supervisor on duty.
+
+96
+00:04:30,996 --> 00:04:33,885
+The file doesn't say what
+a change would sound like.
+
+97
+00:04:33,885 --> 00:04:34,685
+Louder?
+
+98
+00:04:34,273 --> 00:04:35,329
+Closer to the door?
+
+99
+00:04:36,029 --> 00:04:36,879
+Or one night...
+
+100
+00:04:37,879 --> 00:04:38,679
+silence.
+
+101
+00:04:40,636 --> 00:04:43,400
+And here's something
+the file never answers.
+
+102
+00:04:43,400 --> 00:04:45,347
+Does a camera count as looking?
+
+103
+00:04:45,347 --> 00:04:47,798
+Tell me what you think in the comments.
+
+104
+00:04:51,698 --> 00:04:54,218
+Now here's the part
+most people don't know.
+
+105
+00:04:54,718 --> 00:04:56,007
+June 22nd, 2007.
+
+106
+00:04:56,007 --> 00:05:00,358
+Someone posts anonymously on
+4chan's paranormal board.
+
+107
+00:05:00,808 --> 00:05:02,540
+A photo of a strange statue.
+
+108
+00:05:02,540 --> 00:05:07,055
+And under it, a few paragraphs written
+like a classified government file.
+
+109
+00:05:07,455 --> 00:05:08,291
+Item number.
+
+110
+00:05:08,291 --> 00:05:09,197
+Object class.
+
+111
+00:05:09,197 --> 00:05:11,358
+Special containment procedures.
+
+112
+00:05:11,958 --> 00:05:12,824
+People loved it.
+
+113
+00:05:12,824 --> 00:05:14,720
+And they started writing their own.
+
+114
+00:05:15,170 --> 00:05:17,158
+By January 2008, there was a wiki.
+
+115
+00:05:17,158 --> 00:05:20,725
+That summer, it moved to the
+site where it still lives today.
+
+116
+00:05:21,175 --> 00:05:25,213
+Today there are over
+ten thousand SCP files.
+
+117
+00:05:25,213 --> 00:05:26,013
+096.
+
+118
+00:05:25,580 --> 00:05:26,380
+682.
+
+119
+00:05:25,947 --> 00:05:31,911
+Nearly all of them still follow
+the format this one post started.
+
+120
+00:05:32,361 --> 00:05:34,720
+Its author was later identified.
+
+121
+00:05:34,720 --> 00:05:36,047
+He goes by Moto42.
+
+122
+00:05:36,747 --> 00:05:39,251
+There's even a strange coincidence.
+
+123
+00:05:39,251 --> 00:05:44,975
+Less than two weeks before that post, a
+TV episode aired about statues that only
+
+124
+00:05:44,975 --> 00:05:46,907
+move when nobody's looking.
+
+125
+00:05:46,907 --> 00:05:50,413
+People still debate whether
+that was an accident.
+
+126
+00:05:51,085 --> 00:05:56,666
+And in 2012, a free game called SCP:
+Containment Breach turned the rule into a
+
+127
+00:05:56,666 --> 00:05:57,466
+mechanic.
+
+128
+00:05:57,310 --> 00:05:58,885
+A meter that drains...
+
+129
+00:05:58,885 --> 00:06:00,960
+until you're forced to blink.
+
+130
+00:06:01,482 --> 00:06:06,076
+For a lot of people, that was the
+first time they ever met SCP-173.
+
+131
+00:06:09,976 --> 00:06:11,461
+But there's one more twist.
+
+132
+00:06:11,461 --> 00:06:14,594
+The statue in that photo was
+never meant to be a monster.
+
+133
+00:06:15,044 --> 00:06:16,865
+It was a real sculpture.
+
+134
+00:06:17,215 --> 00:06:21,467
+Untitled 2004, by the
+Japanese artist Izumi Kato.
+
+135
+00:06:21,867 --> 00:06:23,951
+And it was used without his permission.
+
+136
+00:06:24,451 --> 00:06:26,987
+In 2014, the wiki reached out to him.
+
+137
+00:06:26,987 --> 00:06:30,756
+He reluctantly allowed it,
+for non-commercial use only.
+
+138
+00:06:31,206 --> 00:06:34,435
+But people kept selling merchandise
+with his sculpture on it anyway.
+
+139
+00:06:34,935 --> 00:06:39,216
+So in February 2022, the
+SCP wiki removed the photo.
+
+140
+00:06:39,216 --> 00:06:42,591
+And Moto42 asked that nothing replace it.
+
+141
+00:06:43,191 --> 00:06:44,994
+Which means today...
+
+142
+00:06:44,994 --> 00:06:47,789
+SCP-173 officially has no face.
+
+143
+00:06:48,689 --> 00:06:52,461
+Every version you've ever seen
+is somebody's own design.
+
+144
+00:06:52,461 --> 00:06:53,472
+Including ours.
+
+145
+00:06:53,472 --> 00:06:56,571
+Ours is built from exactly
+what the file says.
+
+146
+00:06:56,571 --> 00:06:57,371
+Concrete.
+
+147
+00:06:57,177 --> 00:06:57,977
+Rebar.
+
+148
+00:06:57,582 --> 00:06:58,390
+Spray paint.
+
+149
+00:06:58,390 --> 00:06:59,266
+Nothing more.
+
+150
+00:06:59,866 --> 00:07:05,196
+The real SCP-173 is whatever you
+see when you close your eyes.
+
+151
+00:07:06,796 --> 00:07:09,965
+The entire file is barely
+more than two hundred words.
+
+152
+00:07:09,965 --> 00:07:13,075
+And it's been scaring people
+for almost twenty years.
+
+153
+00:07:13,575 --> 00:07:16,183
+Because it was never
+really about a statue.
+
+154
+00:07:16,183 --> 00:07:19,761
+It's about the one thing your
+body does without asking you.
+
+155
+00:07:20,461 --> 00:07:23,337
+You've blinked dozens of times
+since this video started.
+
+156
+00:07:23,937 --> 00:07:26,159
+Every single one was a chance.
+
+157
+00:07:29,059 --> 00:07:29,862
+Don't blink.
+
+158
+00:07:32,362 --> 00:07:36,862
+SCP-173 is the one you
+can never stop looking at.
+
+159
+00:07:36,862 --> 00:07:40,628
+SCP-096 is the one you can never look at.
+
+160
+00:07:40,628 --> 00:07:43,659
+Its complete story is right here.
+

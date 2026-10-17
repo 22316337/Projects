@@ -1,0 +1,38 @@
+TITLE (pick one)
+1. SCP-173: The Complete Story | The Statue That Started Everything
+2. SCP-173: The Complete Story (Don't Blink)
+3. The First SCP Ever Written Has No Face | SCP-173: The Complete Story
+
+DESCRIPTION
+You blink about 15 times a minute. SCP-173 only needs one.
+
+The complete story of SCP-173, the very first SCP ever written: what the file actually says, the math behind the "call your blinks" rule, the cleaning detail, the scraping sounds behind the locked door... and the real story of the 2007 post that started the entire SCP Foundation, the sculpture in the original photo, and why SCP-173 officially has no face today.
+
+Does a camera count as looking? Tell me in the comments.
+
+0:00 You blink 15 times a minute
+0:41 Chapter 1 — The File
+1:26 Chapter 2 — The Rule
+2:13 Chapter 3 — The Blink Problem
+3:29 Chapter 4 — The Cleaning
+4:00 Chapter 5 — The Sounds
+4:48 Chapter 6 — The Real Story
+6:07 Chapter 7 — The Face
+7:06 Don't blink
+
+Credits & licensing
+Based on "SCP-173" by Moto42, SCP Wiki — https://scpwiki.com/scp-173 — licensed under CC BY-SA 3.0. This video is released under CC BY-SA 3.0.
+The statue in this video is our own original 3D design, built only from the article's description (concrete, rebar, spray paint). It is not a depiction of Izumi Kato's sculpture "Untitled 2004", which was removed from the SCP Wiki in 2022.
+Real-world history from public sources (Wikipedia: SCP-173, SCP Foundation, SCP – Containment Breach; Kotaku; Dread Central).
+Music: original score made with VSCO 2 Community Edition orchestral samples (CC0).
+Narration uses an AI-generated voice. Visuals are original 3D renders and motion graphics.
+
+TAGS
+scp 173, scp-173, scp foundation, scp complete story, the sculpture, peanut scp, don't blink, scp explained, scp lore, scp containment breach, found footage, analog horror, horror story, creepypasta, scp 096
+
+SETTINGS CHECKLIST
+- Category: Film & Animation (or Entertainment)
+- Altered or synthetic content: the narration voice is AI-generated; tick "Yes" if YouTube asks about realistic synthetic content (it doesn't imitate a real person, but being upfront is safest)
+- Upload the .srt as English subtitles
+- End screen: from 7:42 to the end — Video element (left box) = "SCP-096: The Complete Story", Best for viewer (right box), Subscribe (circle)
+- Chapters are automatic from the timestamps above
